@@ -25,27 +25,26 @@ public class WorkerThread implements Runnable{
 
   @Override
   public void run(){
-    System.err.println("workerThreadisRunning "+workload);
+    
     props = new Properties();
     props.put("groupid", workload.consumerGroup);
-    props.put("zk.connect", "localhost:8888");
+    props.put("zk.connect", workload.zkConnect);
     config = new ConsumerConfig(props);
     consumerConnector = Consumer.createJavaConsumerConnector(config);
-    //ironWorker.
+
     try {
       handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {
       System.err.println(ex.toString());
     }
-     System.err.println("created handler");
+    handler.setWorkload(this.workload);
+
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
     Map<String,List<KafkaMessageStream<Message>>> topicMessageStreams =
             consumerConnector.createMessageStreams(consumers);
-      System.err.println("created streams");
     List<KafkaMessageStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
-    System.err.println("streams size "+streams.size());
     for (KafkaMessageStream<Message> stream:streams){
       for(Message message:stream){
         handler.handleMessage(message);
@@ -54,3 +53,7 @@ public class WorkerThread implements Runnable{
     System.err.println("thread end");
   }
 }
+
+// offset storage ?
+//stop ?
+//faults ?

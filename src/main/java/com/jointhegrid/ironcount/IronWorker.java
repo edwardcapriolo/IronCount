@@ -34,12 +34,9 @@ public class IronWorker implements Runnable {
     while (goOn) {
       if (slots.activeCount() < this.slotcount) {
         List<Workload> workloads = dl.getWorkloads();
-        System.err.println("workloads size " + workloads.size());
         for (Workload workload : workloads) {
           JobInfo ji = dl.getJobInfoForWorkload(workload);
           if (ji.workerIds.size() < workload.maxWorkers) {
-            System.err.println("workers:" +ji.workerIds.size() +" max:"+ workload.maxWorkers);
-            System.out.println("trying to sart");
             startWorker(workload);
           } else {
             System.out.println("more workers then maxWorkers. Will not start");
@@ -48,17 +45,14 @@ public class IronWorker implements Runnable {
       }
       sleep(1);
     }
-    System.err.println("ending run loop");
   }
 
   public void startWorker(Workload w){
-    System.out.println("startWorker start");
     WorkerThread wt = new WorkerThread(this,w);
     Thread t = new Thread(this.slots, wt);
     t.setDaemon(false);
     t.start();
     dl.registerJob(w, this);
-    System.out.println("startWorker end");
   }
 
   public void sleep(long millis) {
@@ -84,6 +78,7 @@ public class IronWorker implements Runnable {
     t.setDaemon(false);
     t.start();
   }
+  
   public static void main(String[] args) {
     IronWorker iw = new IronWorker();
     iw.runDaemon();

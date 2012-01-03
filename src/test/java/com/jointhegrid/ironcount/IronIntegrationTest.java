@@ -121,9 +121,11 @@ public class IronIntegrationTest {
     w.name="testworkload";
     w.properties=new HashMap<String,String>();
     w.topic=topic;
+    w.zkConnect="localhost:8888";
 
     DataLayer dl = new DataLayer(this.cluster);
     dl.createMetaInfo();
+
     try {
       Thread.sleep(1000);
     } catch (InterruptedException ex) {
@@ -133,12 +135,15 @@ public class IronIntegrationTest {
     IronWorker iw = new IronWorker();
     iw.runDaemon();
 
+    IronWorker iw2 = new IronWorker();
+    iw2.runDaemon();
+
     dl.startWorkload(w);
     
     producer.send(new ProducerData<Integer, String>(topic, "1 b c"));
     producer.send(new ProducerData<Integer, String>(topic, "d e f"));
     try {
-      Thread.sleep(15000);
+      Thread.sleep(3000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }

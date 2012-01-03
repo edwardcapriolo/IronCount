@@ -8,6 +8,7 @@ public class Workload {
   public String topic;
   public String consumerGroup;
   public String messageHandlerName;
+  public String zkConnect;
   public Integer maxWorkers;
   public Map<String, String> properties;
   public Boolean active;//want to use this

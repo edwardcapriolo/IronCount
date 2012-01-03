@@ -86,7 +86,7 @@ public class IronIntegrationTest {
     consumerConfig = new ConsumerConfig(consumerProps);
     producerConfig = new ProducerConfig(producerProps);
 
-    brokerProps.setProperty("topic.partition.count.map", "events:2");
+    brokerProps.setProperty("topic.partition.count.map", topic+":2");
     brokerProps.setProperty("num.partitions", "2");
     brokerProps.setProperty("brokerid", "1");
     brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
@@ -116,7 +116,7 @@ public class IronIntegrationTest {
     Workload w = new Workload();
     w.active=true;
     w.consumerGroup="group1";
-    w.maxWorkers=2;
+    w.maxWorkers=1;
     w.messageHandlerName="com.jointhegrid.ironcount.SimpleMessageHandler";
     w.name="testworkload";
     w.properties=new HashMap<String,String>();
@@ -138,7 +138,7 @@ public class IronIntegrationTest {
     producer.send(new ProducerData<Integer, String>(topic, "1 b c"));
     producer.send(new ProducerData<Integer, String>(topic, "d e f"));
     try {
-      Thread.sleep(3000);
+      Thread.sleep(15000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }

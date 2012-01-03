@@ -47,6 +47,8 @@ public class IronIntegrationTest {
 
   static EmbeddedZookeeper zk;
 
+  static DataLayer dl;
+
   public IronIntegrationTest() {
   }
 
@@ -96,6 +98,9 @@ public class IronIntegrationTest {
     server = new kafka.server.KafkaServer(config);
     server.startup();
     consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
+
+    dl = new DataLayer(cluster);
+    dl.createMetaInfo();
   }
 
   @AfterClass
@@ -118,8 +123,8 @@ public class IronIntegrationTest {
     w.topic=topic;
     w.zkConnect="localhost:8888";
 
-    DataLayer dl = new DataLayer(this.cluster);
-    dl.createMetaInfo();
+    //DataLayer dl = new DataLayer(this.cluster);
+    //dl.createMetaInfo();
 
     try {
       Thread.sleep(1000);

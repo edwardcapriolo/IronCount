@@ -28,33 +28,28 @@ import org.junit.Test;
 
 public class IronIntegrationTest {
 
-  static EmbeddedCassandraService ecs;
-  static Cluster cluster;
+  EmbeddedCassandraService ecs;
+  Cluster cluster;
 
-  static KafkaServer server;
-  static Properties consumerProps;
-  static Properties producerProps;
-  static Properties brokerProps;
+  KafkaServer server;
+  Properties consumerProps;
+  Properties producerProps;
+  Properties brokerProps;
 
-  static KafkaConfig config;
+  KafkaConfig config;
 
-  static ConsumerConnector consumerConnector;
-  static Producer producer;
-  static ProducerConfig producerConfig;
-  static ConsumerConfig consumerConfig;
+  ConsumerConnector consumerConnector;
+  Producer producer;
+  ProducerConfig producerConfig;
+  ConsumerConfig consumerConfig;
 
-  static String topic="events";
+  String topic="events";
 
-  static EmbeddedZookeeper zk;
+  EmbeddedZookeeper zk;
+  DataLayer dl;
 
-  static DataLayer dl;
-
-  public IronIntegrationTest() {
-  }
-
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-    CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
+  public IronIntegrationTest() throws Exception{
+      CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
     cleaner.prepare();
     ecs = new EmbeddedCassandraService();
     ecs.start();
@@ -103,11 +98,16 @@ public class IronIntegrationTest {
     dl.createMetaInfo();
   }
 
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+  
+  }
+
   @AfterClass
   public static void tearDownClass() throws Exception {
-    if (server !=null){
-      server.shutdown();
-    }
+    //if (server !=null){
+    //  server.shutdown();
+    //}
   }
 
   @Test

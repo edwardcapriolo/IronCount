@@ -3,14 +3,11 @@ package com.jointhegrid.ironcount;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.KafkaMessageStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
 import kafka.javaapi.producer.ProducerData;
@@ -24,10 +21,8 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
 import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -116,7 +111,7 @@ public class IronIntegrationTest {
     Workload w = new Workload();
     w.active=true;
     w.consumerGroup="group1";
-    w.maxWorkers=1;
+    w.maxWorkers=4;
     w.messageHandlerName="com.jointhegrid.ironcount.SimpleMessageHandler";
     w.name="testworkload";
     w.properties=new HashMap<String,String>();
@@ -143,13 +138,14 @@ public class IronIntegrationTest {
     producer.send(new ProducerData<Integer, String>(topic, "1 b c"));
     producer.send(new ProducerData<Integer, String>(topic, "d e f"));
     try {
-      Thread.sleep(3000);
+      Thread.sleep(8000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
     SimpleMessageHandler h = new SimpleMessageHandler();
-    Assert.assertEquals(2, h.messageCount);
+    Assert.assertEquals(2, h.messageCount.get());
+    Assert.assertEquals(true, h.handlerCount.get()>=2);
 
     iw.stop();
   }

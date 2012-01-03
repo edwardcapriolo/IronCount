@@ -37,10 +37,16 @@ public class IronWorker implements Runnable {
         for (Workload workload : workloads) {
           JobInfo ji = dl.getJobInfoForWorkload(workload);
           if (ji.workerIds.size() < workload.maxWorkers) {
-            startWorker(workload);
+            if (! ji.workerIds.contains(this.myId.toString())){
+              startWorker(workload);
+            } else {
+              System.out.println("already running a workload of this type on this node");
+            }
           } else {
             System.out.println("more workers then maxWorkers. Will not start");
           }
+
+
         }
       }
       sleep(1);

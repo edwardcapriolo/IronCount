@@ -1,29 +1,21 @@
 package com.jointhegrid.ironcount;
 
 import java.util.HashMap;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.factory.HFactory;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
-import org.apache.cassandra.service.EmbeddedCassandraService;
+
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
-public class DataLayerTest {
-  static EmbeddedCassandraService ecs;
-  static Cluster cluster;
+public class DataLayerTest extends BaseEmbededServerSetupTest {
   static DataLayer d;
 
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-    CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-    cleaner.prepare();
-    ecs = new EmbeddedCassandraService();
-    ecs.start();
-    cluster = HFactory.getOrCreateCluster("Test Cluster", "localhost:9157");
+  @Before
+  public void setupLocal() throws Exception {
     d = new DataLayer(cluster);
     d.createMetaInfo();
   }
+
+
 
   @Test
   public void aTest(){

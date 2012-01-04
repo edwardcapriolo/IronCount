@@ -45,6 +45,8 @@ public class EmbeddedZookeeper {
   }
 
   public static void delete(File f) throws IOException {
+    if ( !f.exists() )
+      return;
     if (f.isDirectory()) {
       for (File c : f.listFiles()) {
         delete(c);

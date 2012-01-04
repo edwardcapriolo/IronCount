@@ -2,62 +2,44 @@ package com.jointhegrid.ironcount;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
-import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
-
-
 import kafka.producer.ProducerConfig;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.factory.HFactory;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
-import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.Before;
 
-public class IronIntegrationTest {
+public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
-  public EmbeddedCassandraService ecs;
-  public Cluster cluster;
-
-  public KafkaServer server;
+  public static KafkaServer server;
   public Properties consumerProps;
   public Properties producerProps;
   public Properties brokerProps;
 
- public  KafkaConfig config;
+  public  KafkaConfig config;
 
-  public ConsumerConnector consumerConnector;
+  public static ConsumerConnector consumerConnector;
   public Producer producer;
   public ProducerConfig producerConfig;
   public ConsumerConfig consumerConfig;
 
   public String topic="events";
 
-  public EmbeddedZookeeper zk;
+  public static EmbeddedZookeeper zk;
   public DataLayer dl;
 
-  public IronIntegrationTest() throws Exception{
-      CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-    cleaner.prepare();
-    ecs = new EmbeddedCassandraService();
-    ecs.start();
-    cluster = HFactory.getOrCreateCluster("Test Cluster", "localhost:9157");
-
-    zk = new EmbeddedZookeeper(8888);
-    zk.prepair();
-    zk.start();
+  @Before
+  public void setupLocal() throws Exception{
+    if ( zk == null ) {
+      zk = new EmbeddedZookeeper(8888);
+      zk.prepair();
+      zk.start();
+    }
 
     File ks1logdir = new File("/tmp/ks1logdir");
     ks1logdir.mkdir();
@@ -90,24 +72,13 @@ public class IronIntegrationTest {
 
     producer = new Producer<Integer,String>(producerConfig);
 
-    server = new kafka.server.KafkaServer(config);
-    server.startup();
-    consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-
+    if ( server == null ) {
+      server = new kafka.server.KafkaServer(config);
+      server.startup();
+      consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
+    }
     dl = new DataLayer(cluster);
     dl.createMetaInfo();
-  }
-
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-  
-  }
-
-  @AfterClass
-  public static void tearDownClass() throws Exception {
-    //if (server !=null){
-    //  server.shutdown();
-    //}
   }
 
   /*

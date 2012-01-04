@@ -28,25 +28,25 @@ import org.junit.Test;
 
 public class IronIntegrationTest {
 
-  EmbeddedCassandraService ecs;
-  Cluster cluster;
+  public EmbeddedCassandraService ecs;
+  public Cluster cluster;
 
-  KafkaServer server;
-  Properties consumerProps;
-  Properties producerProps;
-  Properties brokerProps;
+  public KafkaServer server;
+  public Properties consumerProps;
+  public Properties producerProps;
+  public Properties brokerProps;
 
-  KafkaConfig config;
+ public  KafkaConfig config;
 
-  ConsumerConnector consumerConnector;
-  Producer producer;
-  ProducerConfig producerConfig;
-  ConsumerConfig consumerConfig;
+  public ConsumerConnector consumerConnector;
+  public Producer producer;
+  public ProducerConfig producerConfig;
+  public ConsumerConfig consumerConfig;
 
-  String topic="events";
+  public String topic="events";
 
-  EmbeddedZookeeper zk;
-  DataLayer dl;
+  public EmbeddedZookeeper zk;
+  public DataLayer dl;
 
   public IronIntegrationTest() throws Exception{
       CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
@@ -110,6 +110,7 @@ public class IronIntegrationTest {
     //}
   }
 
+  /*
   @Test
   public void hello() {
 
@@ -154,7 +155,7 @@ public class IronIntegrationTest {
 
     iw.stop();
   }
-
+*/
   public static String getMessage(Message message) {
     ByteBuffer buffer = message.payload();
     byte[] bytes = new byte[buffer.remaining()];

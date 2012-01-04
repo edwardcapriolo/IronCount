@@ -21,6 +21,7 @@ public class IronWorker implements Runnable {
 
       @Override
       public void uncaughtException(Thread t, Throwable e) {
+        System.err.println(e);
         throw new RuntimeException(e);
       }
     };

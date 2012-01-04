@@ -1,113 +1,17 @@
 package com.jointhegrid.ironcount;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerConfig;
+
 import kafka.consumer.KafkaMessageStream;
-import kafka.javaapi.consumer.ConsumerConnector;
-import kafka.javaapi.producer.Producer;
 import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
-
-
-import kafka.producer.ProducerConfig;
-import kafka.server.KafkaConfig;
-import kafka.server.KafkaServer;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.factory.HFactory;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
-import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class IntegrationTest {
+public class IntegrationTest extends IronIntegrationTest {
 
-   EmbeddedCassandraService ecs;
-   Cluster cluster;
-
-   KafkaServer server;
-   Properties consumerProps;
-   Properties producerProps;
-   Properties brokerProps;
-  
-   KafkaConfig config;
-
-   ConsumerConnector consumerConnector;
-   Producer producer;
-   ProducerConfig producerConfig;
-   ConsumerConfig consumerConfig;
-
-   String topic="events";
-
-   EmbeddedZookeeper zk;
-
-  public IntegrationTest() throws Exception{
-      CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-    cleaner.prepare();
-    ecs = new EmbeddedCassandraService();
-    ecs.start();
-    cluster = HFactory.getOrCreateCluster("Test Cluster", "localhost:9157");
-
-    zk = new EmbeddedZookeeper(8888);
-    zk.prepair();
-    zk.start();
-
-    File ks1logdir = new File("/tmp/ks1logdir");
-    ks1logdir.mkdir();
-
-    brokerProps = new Properties();
-    brokerProps.put("enable.zookeeper","true");
-    brokerProps.put("zk.connect", "localhost:8888");
-    brokerProps.put("port","9092");
-
-    consumerProps = new Properties();
-    consumerProps.put("zk.connect", "localhost:8888");
-
-    producerProps = new Properties();
-    producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
-    producerProps.put("zk.connect", "localhost:8888");
-
-
-    consumerProps.setProperty("groupid", "group1");
-    consumerConfig = new ConsumerConfig(consumerProps);
-    producerConfig = new ProducerConfig(producerProps);
-
-    brokerProps.setProperty("topic.partition.count.map", "events:2");
-    brokerProps.setProperty("num.partitions", "2");
-    brokerProps.setProperty("brokerid", "1");
-    brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
-
-    File f = new File ("/tmp/ks1logdir");
-    EmbeddedZookeeper.delete(f);
-
-    config = new KafkaConfig(brokerProps);
-
-    producer = new Producer<Integer,String>(producerConfig);
-
-
-    server = new kafka.server.KafkaServer(config);
-    server.startup();
-    consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-
-  }
-
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-  
-  }
-
-  @AfterClass
-  public static void tearDownClass() throws Exception {
-    //server.shutdown();
-  }
 
   @Test
   public void hello() {

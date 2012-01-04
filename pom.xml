@@ -17,6 +17,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>me.prettyprint</groupId>
+      <artifactId>hector-test</artifactId>
+      <version>1.0-2</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -47,16 +54,11 @@
       <artifactId>derby</artifactId>
       <version>10.8.1.2</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-javautils</artifactId>
-      <version>0.7.1</version>
-    </dependency>
+      
     <dependency>
       <groupId>me.prettyprint</groupId>
       <artifactId>hector-core</artifactId>
-      <version>1.0-1</version>
+      <version>1.0-2</version>
     </dependency>
 
     <dependency>

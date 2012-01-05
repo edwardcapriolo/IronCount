@@ -1,7 +1,6 @@
 package com.jointhegrid.ironcount.mockingbird;
 
 import com.jointhegrid.ironcount.MessageHandler;
-import com.jointhegrid.ironcount.StringSerializer;
 import com.jointhegrid.ironcount.Workload;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -11,10 +10,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Stack;
 import kafka.message.Message;
+import me.prettyprint.cassandra.serializers.CompositeSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.Composite;
+import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 /*
  * http://www.slideshare.net/kevinweil/rainbird-realtime-analytics-at-twitter-strata-2011
  *
@@ -46,7 +49,6 @@ public class MockingBirdMessageHandler implements MessageHandler{
    */
 
   public void handleMessage(Message m) {
-     System.err.println("4");
     String url = getMessage(m);
     URI i = URI.create(url);
     String domain=i.getHost();
@@ -65,8 +67,14 @@ public class MockingBirdMessageHandler implements MessageHandler{
   }
 
   public void countIt(String s){
-  
-  
+    Composite key = new Composite();
+    key.addComponent(s, StringSerializer.get());
+    key.addComponent(bucketByMinute.format( new Date()), StringSerializer.get());
+    Mutator<Composite> m = HFactory.createMutator(keyspace, new CompositeSerializer());
+    HCounterColumn<String> hc = HFactory.createCounterColumn("count", 1, new StringSerializer());
+    m.addCounter(key, w.properties.get("mocking.ks"), hc);
+    m.execute();
+
   }
 
   public static String getMessage(Message message) {

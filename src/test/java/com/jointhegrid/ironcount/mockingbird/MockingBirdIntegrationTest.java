@@ -11,16 +11,25 @@ import java.util.logging.Logger;
 import com.jointhegrid.ironcount.IronIntegrationTest;
 import com.jointhegrid.ironcount.IronWorker;
 import com.jointhegrid.ironcount.Workload;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import kafka.javaapi.producer.ProducerData;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
+import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
+import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
+import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -33,39 +42,36 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
   // The methods must be annotated with annotation @Test. For example:
   //
   // @Test
- @Test
+  @Test
   public void mockingBirdDemo() {
 
-   // set up the column families to save data in
-   KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mockingbird");
-   ColumnFamilyDefinition cfwork = HFactory.createColumnFamilyDefinition
-           ("mockingbird", "mockingbird", ComparatorType.UTF8TYPE);
-   cluster.addKeyspace(ksDef, true);
-   Keyspace moch = HFactory.createKeyspace("mockingbird", cluster);
-   CqlQuery<String,String,String> cqlQuery = new CqlQuery<String,String,String>
-           (moch,StringSerializer.get(),StringSerializer.get(),StringSerializer.get());
-   cqlQuery.setQuery("create columnfamily mockingbird (key 'CompositeType(org.apache.cassandra.db.marshal.UTF8Type,org.apache.cassandra.db.marshal.UTF8Type)' primary key) with  "+
-  "comparator = 'org.apache.cassandra.db.marshal.UTF8Type' "+
-  "and default_validation = 'CounterColumnType' " );
-  QueryResult<CqlRows<String,String,String>> result = cqlQuery.execute();
-
-
+    // set up the column families to save data in
+    KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mockingbird");
+    // ColumnFamilyDefinition cfwork = HFactory.createColumnFamilyDefinition
+    //        ("mockingbird", "mockingbird", ComparatorType.UTF8TYPE);
+    cluster.addKeyspace(ksDef, true);
+    Keyspace moch = HFactory.createKeyspace("mockingbird", cluster);
+    CqlQuery<String, String, String> cqlQuery = new CqlQuery<String, String, String>(moch, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
+    cqlQuery.setQuery("create columnfamily mockingbird (key 'CompositeType(org.apache.cassandra.db.marshal.UTF8Type,org.apache.cassandra.db.marshal.UTF8Type)' primary key) with  "
+            + "comparator = 'org.apache.cassandra.db.marshal.UTF8Type' "
+            + "and default_validation = 'CounterColumnType' ");
+    QueryResult<CqlRows<String, String, String>> result = cqlQuery.execute();
 
     Workload w = new Workload();
-    w.active=true;
-    w.consumerGroup="group1";
-    w.maxWorkers=4;
-    w.messageHandlerName="com.jointhegrid.ironcount.mockingbird.MockingBirdMessageHandler";
-    w.name="testworkload";
-    w.properties=new HashMap<String,String>();
-    w.topic=topic;
-    w.zkConnect="localhost:8888";
+    w.active = true;
+    w.consumerGroup = "group1";
+    w.maxWorkers = 4;
+    w.messageHandlerName = "com.jointhegrid.ironcount.mockingbird.MockingBirdMessageHandler";
+    w.name = "testworkload";
+    w.properties = new HashMap<String, String>();
+    w.topic = topic;
+    w.zkConnect = "localhost:8888";
 
     //pass the cassandra information to the IronWorker
     w.properties.put("mocking.ks", "mockingbird");
     w.properties.put("mocking.cf", "mockingbird");
-    w.properties.put("mocking.cas","localhost:9157");
-    
+    w.properties.put("mocking.cas", "localhost:9157");
+
 
     try {
       Thread.sleep(1000);
@@ -89,6 +95,10 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
+
+
+
+    //res.getColumn("count");
 
     //SimpleMessageHandler h = new SimpleMessageHandler();
     //Assert.assertEquals(2, h.messageCount.get());

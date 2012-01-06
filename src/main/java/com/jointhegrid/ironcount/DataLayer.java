@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
@@ -18,8 +17,6 @@ import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
@@ -95,9 +92,9 @@ public class DataLayer {
     return ji;
   }
 
-  public void registerJob(Workload w,IronWorker iw){
+  public void registerJob(Workload w,WorkerThread wt){
     ColumnFamilyUpdater<String,String> ji = jobInfoTemplate.createUpdater(w.name);
-    ji.setString(iw.myId.toString(), "");
+    ji.setString(wt.wtId.toString(), "");
     jobInfoTemplate.update(ji);
   }
 

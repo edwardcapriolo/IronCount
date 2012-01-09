@@ -1,5 +1,9 @@
 package com.jointhegrid.ironcount;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
+
 import jline.ConsoleReader;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
@@ -12,8 +16,8 @@ import org.apache.commons.cli.*;
  */
 public class IroncountCli {
 
-  private IroncountWorkloadManager workloadManager;
-
+  private static IroncountWorkloadManager workloadManager;
+  private static Properties properties;
   private static Cluster cluster;
 
   public static void main(String [] args) throws Exception {
@@ -21,7 +25,7 @@ public class IroncountCli {
     // instantiate target (properties file for now)
 
     // TODO parse & apply parameters from CLI
-
+    // TODO push through config properties file
     IroncountCli ic = new IroncountCli();
 
     ic.doExecute();
@@ -29,9 +33,17 @@ public class IroncountCli {
     ConsoleReader reader = new ConsoleReader();
     String line;
     while ((line = reader.readLine("[ironcount] ")) != null) {
-      if ( line.equalsIgnoreCase("exit")) {
+      if ( line.equalsIgnoreCase("exit") ) {
         System.exit(0);
-      }
+      } else if ( line.equalsIgnoreCase("stop") ) {
+      reader.printString("Stopping ironcount workload manager...");
+      workloadManager.shutdown();
+      reader.printString("Stopped. \n");
+    } else if ( line.equalsIgnoreCase("start") ) {
+      reader.printString("Starting ironcount workload manager...");
+      workloadManager.init();
+      reader.printString("OK \n");
+    }
       processArgs(line.split(" "), reader);
     }
   }
@@ -47,11 +59,10 @@ public class IroncountCli {
   }
 
   private static Options buildOptions() {
-      Options options = new Options();
-      options.addOption("h", "help", false, "Print this help message and exit");
-      options.addOption("start", true, "Start Ironcount (default when no args are given)");
-      options.addOption("stop", true, "Stop the Ironcount workers");
-      return options;
+    Options options = new Options();
+    options.addOption("h", "help", false, "Print this help message and exit");
+    options.addOption("p","props", true, "The properties file from which we will load ironcount settings");
+    return options;
   }
 
 
@@ -60,9 +71,15 @@ public class IroncountCli {
     CommandLine cmd = parser.parse( buildOptions(), args);
     if ( cmd.hasOption("help")) {
       HelpFormatter hf = new HelpFormatter();
-      hf.printHelp( "ironcount [options]...", buildOptions() );
+      hf.printHelp("ironcount [options]...", buildOptions());
       return cmd;
     }
+    // TODO differentiate between startup vs. running commands
+    if ( cmd.hasOption("props") ) {
+      properties = new Properties();
+      properties.load(new FileReader(new File(cmd.getOptionValue("props"))));
+    }
+
     return cmd;
   }
 

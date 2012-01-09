@@ -28,6 +28,7 @@ public class IroncountWorkloadManager {
   }
 
   public void init() {
+    active.set(true);
     executor = Executors.newFixedThreadPool(threadPoolSize);
     scheduledExector = Executors.newScheduledThreadPool(1);
   }

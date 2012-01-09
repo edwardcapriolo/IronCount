@@ -103,6 +103,31 @@
             <target>1.6</target>
           </configuration>
         </plugin>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>appassembler-maven-plugin
+                  </artifactId>
+              <configuration>
+                  <programs>
+                      <program>
+                          <mainClass>com.jointhegrid.ironcount.IroncountCli</mainClass>
+                          <name>ironcount</name>
+                      </program>
+                  </programs>
+                  <!-- handy snippet for YourKit profiler attachment (Linux 64bit) -->
+                  <!-- <extraJvmArguments>-agentpath:/usr/local/yjp/bin/linux-x86-64/libyjpagent.so</extraJvmArguments> -->
+                  <repositoryLayout>flat</repositoryLayout>
+              </configuration>
+              <executions>
+                  <execution>
+                      <phase>install</phase>
+                      <goals>
+                          <goal>assemble</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+
       </plugins>
     </pluginManagement>
   </build>

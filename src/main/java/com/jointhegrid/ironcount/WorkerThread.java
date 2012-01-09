@@ -1,9 +1,7 @@
 package com.jointhegrid.ironcount;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaMessageStream;
@@ -11,16 +9,16 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
 
 public class WorkerThread implements Runnable{
-  IronWorker ironWorker;
   Workload workload;
   ConsumerConnector consumerConnector;
   ConsumerConfig config;
   MessageHandler handler;
   Properties props;
+  UUID wtId;
 
-  public WorkerThread(IronWorker parent, Workload w){
-    ironWorker=parent;
+  public WorkerThread(Workload w){
     workload=w;
+    wtId = UUID.randomUUID();
   }
 
   @Override

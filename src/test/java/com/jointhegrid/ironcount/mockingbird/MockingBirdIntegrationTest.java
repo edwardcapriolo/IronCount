@@ -38,17 +38,10 @@ import org.junit.Test;
  */
 public class MockingBirdIntegrationTest extends IronIntegrationTest {
 
-  // TODO add test methods here.
-  // The methods must be annotated with annotation @Test. For example:
-  //
-  // @Test
   @Test
   public void mockingBirdDemo() {
 
-    // set up the column families to save data in
     KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mockingbird");
-    // ColumnFamilyDefinition cfwork = HFactory.createColumnFamilyDefinition
-    //        ("mockingbird", "mockingbird", ComparatorType.UTF8TYPE);
     cluster.addKeyspace(ksDef, true);
     Keyspace moch = HFactory.createKeyspace("mockingbird", cluster);
     CqlQuery<String, String, String> cqlQuery = new CqlQuery<String, String, String>(moch, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
@@ -72,7 +65,6 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     w.properties.put("mocking.cf", "mockingbird");
     w.properties.put("mocking.cas", "localhost:9157");
 
-
     try {
       Thread.sleep(1000);
     } catch (InterruptedException ex) {
@@ -90,19 +82,14 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/stuff"));
     producer.send(new ProducerData<Integer, String>(topic, "http://toys.ed.com/toys"));
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/"));
+
     try {
       Thread.sleep(8000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-
-
-    //res.getColumn("count");
-
-    //SimpleMessageHandler h = new SimpleMessageHandler();
-    //Assert.assertEquals(2, h.messageCount.get());
-    //Assert.assertEquals(true, h.handlerCount.get()>=2);
+    
 
     iw.stop();
   }

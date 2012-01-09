@@ -41,16 +41,18 @@ public class DataLayerTest extends BaseEmbededServerSetupTest {
 
     d.startWorkload(w);
     Assert.assertEquals(w ,d.getWorkloads().get(0));
-    IronWorker iw = new IronWorker();
-    d.registerJob(w, iw);
+    //IronWorker iw = new IronWorker();
+    WorkerThread wt = new WorkerThread(w);
+    d.registerJob(w, wt);
 
-    IronWorker iw2 = new IronWorker();
-    d.registerJob(w, iw2);
+    //IronWorker iw2 = new IronWorker();
+    WorkerThread wt2 = new WorkerThread(w);
+    d.registerJob(w, wt2);
 
     JobInfo i = d.getJobInfoForWorkload(w);
     Assert.assertEquals(w.name, i.workloadName);
-    Assert.assertEquals(true, i.workerIds.contains(iw.myId.toString()));
-    Assert.assertEquals(true, i.workerIds.contains(iw2.myId.toString()));
+    Assert.assertEquals(true, i.workerIds.contains(wt.wtId.toString()));
+    Assert.assertEquals(true, i.workerIds.contains(wt.wtId.toString()));
 
   }
 }

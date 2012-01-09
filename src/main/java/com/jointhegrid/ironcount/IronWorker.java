@@ -29,14 +29,19 @@ public class IronWorker implements Runnable {
 
   @Override
   public void run() {
-
+    // de-couple the task, entry point and execution of said task into 3 different components
     cluster = HFactory.getOrCreateCluster("Test Cluster", "localhost:9157");
     dl = new DataLayer(cluster);
     while (goOn) {
       if (slots.activeCount() < this.slotcount) {
+        // get all the workloads
         List<Workload> workloads = dl.getWorkloads();
         for (Workload workload : workloads) {
+          // get the jobInfo for each workload
           JobInfo ji = dl.getJobInfoForWorkload(workload);
+          // if there are "slots" open for the workload,
+          // start a worker
+          // otherwise, continue
           if (ji.workerIds.size() < workload.maxWorkers) {
             if (! ji.workerIds.contains(this.myId.toString())){
               startWorker(workload);
@@ -55,11 +60,11 @@ public class IronWorker implements Runnable {
   }
 
   public void startWorker(Workload w){
-    WorkerThread wt = new WorkerThread(this,w);
+    WorkerThread wt = new WorkerThread(w);
     Thread t = new Thread(this.slots, wt);
     t.setDaemon(false);
     t.start();
-    dl.registerJob(w, this);
+    dl.registerJob(w, wt);
   }
 
   public void sleep(long millis) {

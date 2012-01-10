@@ -4,6 +4,7 @@ import java.util.*;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
+import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaMessageStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
@@ -14,10 +15,12 @@ public class WorkerThread implements Runnable{
   ConsumerConfig config;
   MessageHandler handler;
   Properties props;
+  boolean goOn;
   //UUID wtId;
 
   public WorkerThread(Workload w){
     workload=w;
+    goOn=true;
     //wtId = UUID.randomUUID();
   }
 
@@ -44,8 +47,12 @@ public class WorkerThread implements Runnable{
     List<KafkaMessageStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
     for (KafkaMessageStream<Message> stream:streams){
-      for(Message message:stream){
-        handler.handleMessage(message);
+      //for(Message message:stream){
+      //  handler.handleMessage(message);
+      //}
+      ConsumerIterator<Message> it= stream.iterator();
+      while (it.hasNext() && goOn){
+        handler.handleMessage(it.next());
       }
     }
     System.err.println("thread end");

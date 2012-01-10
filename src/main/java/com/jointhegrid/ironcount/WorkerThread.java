@@ -47,9 +47,6 @@ public class WorkerThread implements Runnable{
     List<KafkaMessageStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
     for (KafkaMessageStream<Message> stream:streams){
-      //for(Message message:stream){
-      //  handler.handleMessage(message);
-      //}
       ConsumerIterator<Message> it= stream.iterator();
       while (it.hasNext() && goOn){
         handler.handleMessage(it.next());
@@ -62,3 +59,4 @@ public class WorkerThread implements Runnable{
 // offset storage ?
 //stop ?
 //faults ?
+//maybe an enum for the state

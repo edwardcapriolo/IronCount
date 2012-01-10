@@ -110,4 +110,9 @@ public class DataLayer {
     up.setString(w.name, baos.toString());
     workloadTemplate.update(up);
   }
+
+  public void stopWorkload(Workload w){
+    w.active=false;
+    startWorkload(w);
+  }
 }

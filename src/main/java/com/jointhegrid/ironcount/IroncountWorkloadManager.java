@@ -2,6 +2,7 @@ package com.jointhegrid.ironcount;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,11 +24,14 @@ public class IroncountWorkloadManager {
   private AtomicBoolean active;
   private UUID myId;
 
+  private WeakHashMap<WorkerThread,Object> workerThreads;
+
   public IroncountWorkloadManager(Cluster cluster) {
     this.cluster = cluster;
     this.dataLayer = new DataLayer(cluster);
     this.active = new AtomicBoolean(false);
     myId = UUID.randomUUID();
+    workerThreads = new WeakHashMap<WorkerThread,Object>();
   }
 
   public void init() {
@@ -64,12 +68,18 @@ public class IroncountWorkloadManager {
       JobInfo ji = dataLayer.getJobInfoForWorkload(workload);
       if (workload.active==false){
         // if this Manager is running any task of this type shut it down
+        for (WorkerThread wt:this.workerThreads.keySet()){
+          if (wt.workload.name.equals(workload.name)){
+            wt.goOn=false;
+          }
+        }
       } else if (ji.workerIds.size() < workload.maxWorkers &&
          (!ji.workerIds.contains(this.myId.toString())) ) {
         //we do not want to run more then one instance of a Workload because
         //JobInfo can not handle that. This should also naturally spread tasks
         WorkerThread wt = new WorkerThread(workload);
         dataLayer.registerJob(this,workload,wt);
+        this.workerThreads.put(wt, new Object());
         // this executor service is capped at threadPoolSize threads, but has
         // unbounded queuing.
         // TODO switch to ThreadPoolExecutor with an ArrayBlockingQueue and a

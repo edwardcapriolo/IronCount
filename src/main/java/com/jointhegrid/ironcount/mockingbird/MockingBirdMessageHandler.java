@@ -49,7 +49,9 @@ public class MockingBirdMessageHandler implements MessageHandler{
    */
 
   public void handleMessage(Message m) {
+
     String url = getMessage(m);
+    System.err.println(url);
     URI i = URI.create(url);
     String domain=i.getHost();
     String path = i.getPath();
@@ -67,6 +69,7 @@ public class MockingBirdMessageHandler implements MessageHandler{
   }
 
   public void countIt(String s){
+    System.err.println(s);
     Composite key = new Composite();
     key.addComponent(s, StringSerializer.get());
     key.addComponent(bucketByMinute.format( new Date()), StringSerializer.get());

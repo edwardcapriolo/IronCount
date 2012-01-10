@@ -5,8 +5,11 @@ import java.util.UUID;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
 
-public class IronWorker implements Runnable {
+public class IronWorker  {
 
+  /*
+   * implements Runnable
+   
   public int slotcount = 4;
   public ThreadGroup slots;
   public Cluster cluster;
@@ -59,6 +62,7 @@ public class IronWorker implements Runnable {
     }
   }
 
+  /*
   public void startWorker(Workload w){
     WorkerThread wt = new WorkerThread(w);
     Thread t = new Thread(this.slots, wt);
@@ -66,6 +70,7 @@ public class IronWorker implements Runnable {
     t.start();
     dl.registerJob(w, wt);
   }
+  
 
   public void sleep(long millis) {
     try {
@@ -95,4 +100,5 @@ public class IronWorker implements Runnable {
     IronWorker iw = new IronWorker();
     iw.runDaemon();
   }
+  */
 }

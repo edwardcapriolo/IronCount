@@ -92,9 +92,9 @@ public class DataLayer {
     return ji;
   }
 
-  public void registerJob(Workload w,WorkerThread wt){
+  public void registerJob(IroncountWorkloadManager m, Workload w,WorkerThread wt){
     ColumnFamilyUpdater<String,String> ji = jobInfoTemplate.createUpdater(w.name);
-    ji.setString(wt.wtId.toString(), "");
+    ji.setString(m.getMyId().toString(), "");
     jobInfoTemplate.update(ji);
   }
 

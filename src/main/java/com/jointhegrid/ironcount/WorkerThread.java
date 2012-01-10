@@ -14,11 +14,11 @@ public class WorkerThread implements Runnable{
   ConsumerConfig config;
   MessageHandler handler;
   Properties props;
-  UUID wtId;
+  //UUID wtId;
 
   public WorkerThread(Workload w){
     workload=w;
-    wtId = UUID.randomUUID();
+    //wtId = UUID.randomUUID();
   }
 
   @Override

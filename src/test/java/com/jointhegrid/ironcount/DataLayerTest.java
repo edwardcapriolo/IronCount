@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DataLayerTest extends BaseEmbededServerSetupTest {
+  /*
   static DataLayer d;
 
   @Before
@@ -55,4 +56,6 @@ public class DataLayerTest extends BaseEmbededServerSetupTest {
     Assert.assertEquals(true, i.workerIds.contains(wt.wtId.toString()));
 
   }
+   * 
+   */
 }

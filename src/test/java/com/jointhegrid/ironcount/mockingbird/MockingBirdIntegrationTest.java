@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
 import com.jointhegrid.ironcount.IronWorker;
+import com.jointhegrid.ironcount.IroncountWorkloadManager;
 import com.jointhegrid.ironcount.Workload;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -71,11 +72,14 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    IronWorker iw = new IronWorker();
-    iw.runDaemon();
+    //IronWorker iw = new IronWorker();
+    //iw.runDaemon();
 
-    IronWorker iw2 = new IronWorker();
-    iw2.runDaemon();
+    //IronWorker iw2 = new IronWorker();
+    //iw2.runDaemon();
+    IroncountWorkloadManager m = new IroncountWorkloadManager(this.cluster);
+    m.init();
+    m.execute();
 
     dl.startWorkload(w);
 
@@ -84,13 +88,13 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/"));
 
     try {
-      Thread.sleep(8000);
+      Thread.sleep(5000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
     
 
-    iw.stop();
+    m.shutdown();
   }
 }

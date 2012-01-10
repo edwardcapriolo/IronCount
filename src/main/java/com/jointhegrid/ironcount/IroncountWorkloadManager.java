@@ -1,6 +1,7 @@
 package com.jointhegrid.ironcount;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,11 +21,13 @@ public class IroncountWorkloadManager {
   private int threadPoolSize = 4;
   private DataLayer dataLayer;
   private AtomicBoolean active;
+  private UUID myId;
 
   public IroncountWorkloadManager(Cluster cluster) {
     this.cluster = cluster;
     this.dataLayer = new DataLayer(cluster);
     this.active = new AtomicBoolean(false);
+    myId = UUID.randomUUID();
   }
 
   public void init() {
@@ -46,7 +49,7 @@ public class IroncountWorkloadManager {
         executeInternal();
       }
     };
-    scheduledExector.scheduleWithFixedDelay(runner, 0, 5, TimeUnit.SECONDS);
+    scheduledExector.scheduleWithFixedDelay(runner, 0, 2, TimeUnit.SECONDS);
   }
 
   /**
@@ -59,9 +62,14 @@ public class IroncountWorkloadManager {
     for (Workload workload : workloads) {
       // get the jobInfo for each workload
       JobInfo ji = dataLayer.getJobInfoForWorkload(workload);
-      if (ji.workerIds.size() < workload.maxWorkers) {
+      if (workload.active==false){
+        // if this Manager is running any task of this type shut it down
+      } else if (ji.workerIds.size() < workload.maxWorkers &&
+         (!ji.workerIds.contains(this.myId.toString())) ) {
+        //we do not want to run more then one instance of a Workload because
+        //JobInfo can not handle that. This should also naturally spread tasks
         WorkerThread wt = new WorkerThread(workload);
-        dataLayer.registerJob(workload,wt);
+        dataLayer.registerJob(this,workload,wt);
         // this executor service is capped at threadPoolSize threads, but has
         // unbounded queuing.
         // TODO switch to ThreadPoolExecutor with an ArrayBlockingQueue and a
@@ -70,4 +78,13 @@ public class IroncountWorkloadManager {
       }
     }
   }
+
+  public UUID getMyId() {
+    return myId;
+  }
+
+  public void setMyId(UUID myId) {
+    this.myId = myId;
+  }
+  
 }

@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DataLayerTest extends BaseEmbededServerSetupTest {
-  /*
+  
   static DataLayer d;
 
   @Before
@@ -15,7 +15,6 @@ public class DataLayerTest extends BaseEmbededServerSetupTest {
     d = new DataLayer(cluster);
     d.createMetaInfo();
   }
-
 
 
   @Test
@@ -42,20 +41,21 @@ public class DataLayerTest extends BaseEmbededServerSetupTest {
 
     d.startWorkload(w);
     Assert.assertEquals(w ,d.getWorkloads().get(0));
-    //IronWorker iw = new IronWorker();
-    WorkerThread wt = new WorkerThread(w);
-    d.registerJob(w, wt);
 
-    //IronWorker iw2 = new IronWorker();
+
+    IroncountWorkloadManager im = new IroncountWorkloadManager(cluster);
+    WorkerThread wt = new WorkerThread(w);
+    d.registerJob(im, w, wt);
+
+   IroncountWorkloadManager im2 = new IroncountWorkloadManager(cluster);
     WorkerThread wt2 = new WorkerThread(w);
-    d.registerJob(w, wt2);
+    d.registerJob(im2, w, wt2);
 
     JobInfo i = d.getJobInfoForWorkload(w);
     Assert.assertEquals(w.name, i.workloadName);
-    Assert.assertEquals(true, i.workerIds.contains(wt.wtId.toString()));
-    Assert.assertEquals(true, i.workerIds.contains(wt.wtId.toString()));
+    Assert.assertEquals(true, i.workerIds.contains(im.getMyId().toString()));
+    Assert.assertEquals(true, i.workerIds.contains(im.getMyId().toString()));
 
   }
-   * 
-   */
+
 }

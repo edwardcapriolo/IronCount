@@ -29,4 +29,7 @@ public class SimpleMessageHandler implements MessageHandler{
     
   }
 
+  @Override
+  public void setWorkerThread(WorkerThread wt) {
+  }
 }

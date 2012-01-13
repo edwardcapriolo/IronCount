@@ -1,6 +1,7 @@
 package com.jointhegrid.ironcount;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.*;
@@ -24,7 +25,8 @@ public class IroncountWorkloadManager {
   private int threadPoolSize = 4;
   private DataLayer dataLayer;
   private AtomicBoolean active;
-  private UUID myId;
+  private UUID myId;//get this from properties
+  private Properties props;
 
   private WeakHashMap<WorkerThread,Object> workerThreads;
 
@@ -32,7 +34,14 @@ public class IroncountWorkloadManager {
     this.cluster = cluster;
     this.dataLayer = new DataLayer(cluster);
     this.active = new AtomicBoolean(false);
-    myId = UUID.randomUUID();
+    props = System.getProperties();
+    if (props.contains("workermanager.uid")){
+      myId = UUID.fromString((String)props.get("workermanager.uid"));
+      logger.warn("UUID from props file "+myId);
+    } else {
+      myId = UUID.randomUUID();
+      logger.warn("random UUID generated "+myId);
+    }
     workerThreads = new WeakHashMap<WorkerThread,Object>();
   }
 
@@ -69,6 +78,7 @@ public class IroncountWorkloadManager {
     for (Workload workload : workloads) {
       // get the jobInfo for each workload
       JobInfo ji = dataLayer.getJobInfoForWorkload(workload);
+      logger.warn("current number of workers "+ ji.workerIds.size());
       if (workload.active==false){
         // if this Manager is running any task of this type shut it down
         for (WorkerThread wt:this.workerThreads.keySet()){

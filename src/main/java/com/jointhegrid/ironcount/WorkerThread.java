@@ -55,6 +55,7 @@ public class WorkerThread implements Runnable{
       ConsumerIterator<Message> it= stream.iterator();
       status=WorkerThreadStatus.RUNNING;
       while (goOn && it.hasNext() ){
+        System.err.println("blocks?");
         handler.handleMessage(it.next());
 
       }

@@ -10,6 +10,8 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
 
 public class WorkerThread implements Runnable{
+  enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
+  WorkerThreadStatus status;
   Workload workload;
   ConsumerConnector consumerConnector;
   ConsumerConfig config;
@@ -19,6 +21,7 @@ public class WorkerThread implements Runnable{
   //UUID wtId;
 
   public WorkerThread(Workload w){
+    status=WorkerThreadStatus.NEW;
     workload=w;
     goOn=true;
     //wtId = UUID.randomUUID();
@@ -26,7 +29,7 @@ public class WorkerThread implements Runnable{
 
   @Override
   public void run(){
-    
+    status=WorkerThreadStatus.INIT;
     props = new Properties();
     props.put("groupid", workload.consumerGroup);
     props.put("zk.connect", workload.zkConnect);
@@ -39,6 +42,7 @@ public class WorkerThread implements Runnable{
       System.err.println(ex.toString());
     }
     handler.setWorkload(this.workload);
+    handler.setWorkerThread(this);
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
@@ -46,13 +50,17 @@ public class WorkerThread implements Runnable{
             consumerConnector.createMessageStreams(consumers);
     List<KafkaMessageStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
+
     for (KafkaMessageStream<Message> stream:streams){
       ConsumerIterator<Message> it= stream.iterator();
-      while (it.hasNext() && goOn){
+      status=WorkerThreadStatus.RUNNING;
+      while (goOn && it.hasNext() ){
         handler.handleMessage(it.next());
+
       }
     }
     System.err.println("thread end");
+    status=WorkerThreadStatus.DONE;
   }
 }
 

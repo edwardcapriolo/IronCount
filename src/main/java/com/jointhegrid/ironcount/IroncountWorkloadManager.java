@@ -7,12 +7,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import me.prettyprint.hector.api.Cluster;
+import org.apache.log4j.Logger;
 
 /**
  * @author zznate
  */
 public class IroncountWorkloadManager {
 
+  final static Logger logger = Logger.getLogger(IroncountWorkloadManager.class.getName());
   private final Cluster cluster;
   // responsibilities:
   // - control the ExecutorService
@@ -63,6 +65,7 @@ public class IroncountWorkloadManager {
     // while true...
     // get all the workloads
     List<Workload> workloads = dataLayer.getWorkloads();
+    logger.warn("workload size "+ workloads.size());
     for (Workload workload : workloads) {
       // get the jobInfo for each workload
       JobInfo ji = dataLayer.getJobInfoForWorkload(workload);
@@ -71,10 +74,17 @@ public class IroncountWorkloadManager {
         for (WorkerThread wt:this.workerThreads.keySet()){
           if (wt.workload.name.equals(workload.name)){
             wt.goOn=false;
+            //wait for state to hit done?
+            //while (wt.status != WorkerThread.WorkerThreadStatus.DONE){
+            //  System.err.println("waiting for done. Currently "+wt.status);
+            //}
+            //System.err.println("Currently "+wt.status);
+            dataLayer.deregisterJob(this, workload, wt);
           }
         }
       } else if (ji.workerIds.size() < workload.maxWorkers &&
          (!ji.workerIds.contains(this.myId.toString())) ) {
+        logger.warn("Starting instance of "+workload);
         //we do not want to run more then one instance of a Workload because
         //JobInfo can not handle that. This should also naturally spread tasks
         WorkerThread wt = new WorkerThread(workload);

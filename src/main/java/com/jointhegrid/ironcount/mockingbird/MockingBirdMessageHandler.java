@@ -1,6 +1,7 @@
 package com.jointhegrid.ironcount.mockingbird;
 
 import com.jointhegrid.ironcount.MessageHandler;
+import com.jointhegrid.ironcount.WorkerThread;
 import com.jointhegrid.ironcount.Workload;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -85,6 +86,10 @@ public class MockingBirdMessageHandler implements MessageHandler{
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
     return new String(bytes);
+  }
+
+  @Override
+  public void setWorkerThread(WorkerThread wt) {
   }
 
 }

@@ -9,6 +9,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.commons.cli.*;
+import org.apache.log4j.Logger;
 
 /**
  * Entry point for controlling IronCount service
@@ -16,21 +17,30 @@ import org.apache.commons.cli.*;
  */
 public class IroncountCli {
 
+  final static Logger logger = Logger.getLogger(IroncountCli.class.getName());
+
   private static IroncountWorkloadManager workloadManager;
   private static Properties properties;
   private static Cluster cluster;
 
   public static void main(String [] args) throws Exception {
-    cluster = HFactory.createCluster("IroncountCluster",new CassandraHostConfigurator("localhost:9160"));
-    // instantiate target (properties file for now)
-
+    properties = System.getProperties();
+    if (properties.get("cassandra.hosts") == null){
+      logger.warn("cassandra.hosts was not defined setting to localhost:9160");
+      properties.setProperty("cassandra.hosts", "localhost:9160");
+    }
+    cluster = HFactory.createCluster("IroncountCluster",
+            new CassandraHostConfigurator(properties.getProperty("cassandra.hosts")));
+    
     // TODO parse & apply parameters from CLI
     // TODO push through config properties file
     IroncountCli ic = new IroncountCli();
 
     ic.doExecute();
 
+    logger.warn("starting console reader");
     ConsoleReader reader = new ConsoleReader();
+
     String line;
     while ((line = reader.readLine("[ironcount] ")) != null) {
       if ( line.equalsIgnoreCase("exit") ) {
@@ -47,9 +57,6 @@ public class IroncountCli {
       processArgs(line.split(" "), reader);
     }
   }
-
-
-
 
   private void doExecute() {
     // initialize IroncountWorkloadManager

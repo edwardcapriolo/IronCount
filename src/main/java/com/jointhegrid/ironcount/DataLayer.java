@@ -52,14 +52,14 @@ public class DataLayer {
     KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(IRONCOUNT_KEYSPACE);
     System.err.println("createMetaInfo");
     if (keyspaceDef == null) {
-      try {
+      
       KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition(IRONCOUNT_KEYSPACE);
       ColumnFamilyDefinition cfwork = HFactory.createColumnFamilyDefinition(IRONCOUNT_KEYSPACE, WORKLOAD_CF, ComparatorType.UTF8TYPE);
       ColumnFamilyDefinition cfjob = HFactory.createColumnFamilyDefinition(IRONCOUNT_KEYSPACE, JOBINFO_CF, ComparatorType.UTF8TYPE);
       cluster.addKeyspace(ksDef,true);
       cluster.addColumnFamily(cfwork,true);
       cluster.addColumnFamily(cfjob,true);
-      } catch (Exception ex){ throw new RuntimeException(ex);}
+      
     }
   }
 
@@ -96,6 +96,11 @@ public class DataLayer {
     ColumnFamilyUpdater<String,String> ji = jobInfoTemplate.createUpdater(w.name);
     ji.setString(m.getMyId().toString(), "");
     jobInfoTemplate.update(ji);
+  }
+
+  public void deregisterJob(IroncountWorkloadManager m, Workload w,WorkerThread wt){
+    ColumnFamilyUpdater<String,String> ji = jobInfoTemplate.createUpdater(w.name);
+    ji.deleteColumn(m.getMyId().toString());
   }
 
   public void startWorkload(Workload w) {

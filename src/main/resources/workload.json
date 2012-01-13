@@ -1,0 +1,8 @@
+{"name":"testworkload"
+  ,"topic":"topic1"
+  ,"consumerGroup":"group1"
+  ,"messageHandlerName":"com.jointhegrid.ironcount.eventtofile.MessageToFileHandler"
+  ,"zkConnect":"localhost:2181"
+  ,"maxWorkers":4
+  ,"properties":{"aprop":"avalue"}
+  ,"active":true}

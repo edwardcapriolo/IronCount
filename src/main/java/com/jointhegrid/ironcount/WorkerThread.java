@@ -1,6 +1,9 @@
 package com.jointhegrid.ironcount;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -8,8 +11,20 @@ import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaMessageStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooDefs.Ids;
+import org.apache.zookeeper.ZooKeeper;
 
-public class WorkerThread implements Runnable{
+public class WorkerThread implements Runnable, Watcher{
+
+  @Override
+  public void process(WatchedEvent we) {
+
+  }
+  
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
   Workload workload;
@@ -18,13 +33,20 @@ public class WorkerThread implements Runnable{
   MessageHandler handler;
   Properties props;
   boolean goOn;
-  //UUID wtId;
+  UUID wtId;
+  ZooKeeper zk;
 
-  public WorkerThread(Workload w){
+  public WorkerThread(WorkloadManager m, Workload w) {
     status=WorkerThreadStatus.NEW;
     workload=w;
     goOn=true;
-    //wtId = UUID.randomUUID();
+    try {
+      zk = new ZooKeeper("localhost:8888", 3000, this);
+     
+      wtId = UUID.randomUUID();
+    } catch (IOException ex) {
+      Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 
   @Override
@@ -41,8 +63,18 @@ public class WorkerThread implements Runnable{
     } catch (Exception ex) {
       System.err.println(ex.toString());
     }
+
     handler.setWorkload(this.workload);
     handler.setWorkerThread(this);
+    
+    try {
+      zk.create("/ironcount/workloads/" + this.workload.name + "/" + this.wtId,
+              new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+    } catch (KeeperException ex) {
+      Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (InterruptedException ex) {
+      Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+    }
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
@@ -55,7 +87,6 @@ public class WorkerThread implements Runnable{
       ConsumerIterator<Message> it= stream.iterator();
       status=WorkerThreadStatus.RUNNING;
       while (goOn && it.hasNext() ){
-        System.err.println("blocks?");
         handler.handleMessage(it.next());
 
       }
@@ -63,9 +94,5 @@ public class WorkerThread implements Runnable{
     System.err.println("thread end");
     status=WorkerThreadStatus.DONE;
   }
-}
 
-// offset storage ?
-//stop ?
-//faults ?
-//maybe an enum for the state
+}

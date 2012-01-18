@@ -5,9 +5,6 @@ import java.io.IOException;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ComparatorType;
-import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 import org.apache.cassandra.config.ConfigurationException;
@@ -50,20 +47,6 @@ public abstract class BaseEmbededServerSetupTest {
   }
 
   private static void buildTestSchema() {
-    // schema creation as that is handled in DataLayer
-    // TODO encapsulate this in a separate util class
-    KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(DataLayer.IRONCOUNT_KEYSPACE);
-
-    if (keyspaceDef == null) {
-      try {
-      KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition(DataLayer.IRONCOUNT_KEYSPACE);
-      ColumnFamilyDefinition cfwork = HFactory.createColumnFamilyDefinition(DataLayer.IRONCOUNT_KEYSPACE, DataLayer.WORKLOAD_CF, ComparatorType.UTF8TYPE);
-      ColumnFamilyDefinition cfjob = HFactory.createColumnFamilyDefinition(DataLayer.IRONCOUNT_KEYSPACE, DataLayer.JOBINFO_CF, ComparatorType.UTF8TYPE);
-      cluster.addKeyspace(ksDef,true);
-      cluster.addColumnFamily(cfwork,true);
-      cluster.addColumnFamily(cfjob,true);
-      } catch (Exception ex){ throw new RuntimeException(ex);}
-    }
   }
 
 }

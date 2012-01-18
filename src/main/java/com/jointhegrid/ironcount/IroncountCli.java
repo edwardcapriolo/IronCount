@@ -19,7 +19,7 @@ public class IroncountCli {
 
   final static Logger logger = Logger.getLogger(IroncountCli.class.getName());
 
-  private static IroncountWorkloadManager workloadManager;
+  private static WorkloadManager workloadManager;
   private static Properties properties;
   private static Cluster cluster;
 
@@ -60,7 +60,7 @@ public class IroncountCli {
 
   private void doExecute() {
     // initialize IroncountWorkloadManager
-    workloadManager = new IroncountWorkloadManager(cluster);
+ //   workloadManager = new IroncountWorkloadManager(cluster);
     workloadManager.init();
     // produce output
   }

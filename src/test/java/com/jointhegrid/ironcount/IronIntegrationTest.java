@@ -31,11 +31,12 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
   public String topic="events";
 
   public static EmbeddedZookeeper zk;
-  public DataLayer dl;
 
   @Before
   public void setupLocal() throws Exception{
+    System.out.println("setup local");
     if ( zk == null ) {
+
       zk = new EmbeddedZookeeper(8888);
       zk.prepair();
       zk.start();
@@ -77,56 +78,8 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
       server.startup();
       consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
     }
-    dl = new DataLayer(cluster);
-    dl.createMetaInfo();
   }
 
-  /*
-  @Test
-  public void hello() {
-
-    Workload w = new Workload();
-    w.active=true;
-    w.consumerGroup="group1";
-    w.maxWorkers=4;
-    w.messageHandlerName="com.jointhegrid.ironcount.SimpleMessageHandler";
-    w.name="testworkload";
-    w.properties=new HashMap<String,String>();
-    w.topic=topic;
-    w.zkConnect="localhost:8888";
-
-    //DataLayer dl = new DataLayer(this.cluster);
-    //dl.createMetaInfo();
-
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException ex) {
-      Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    
-    IronWorker iw = new IronWorker();
-    iw.runDaemon();
-
-    IronWorker iw2 = new IronWorker();
-    iw2.runDaemon();
-
-    dl.startWorkload(w);
-    
-    producer.send(new ProducerData<Integer, String>(topic, "1 b c"));
-    producer.send(new ProducerData<Integer, String>(topic, "d e f"));
-    try {
-      Thread.sleep(8000);
-    } catch (InterruptedException ex) {
-      Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    SimpleMessageHandler h = new SimpleMessageHandler();
-    Assert.assertEquals(2, h.messageCount.get());
-    Assert.assertEquals(true, h.handlerCount.get()>=2);
-
-    iw.stop();
-  }
-*/
   public static String getMessage(Message message) {
     ByteBuffer buffer = message.payload();
     byte[] bytes = new byte[buffer.remaining()];

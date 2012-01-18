@@ -10,28 +10,19 @@ import org.apache.log4j.Logger;
 public class ICLauncher {
 
   final static Logger logger = Logger.getLogger(ICLauncher.class.getName());
-  private static IroncountWorkloadManager workloadManager;
+  private static WorkloadManager workloadManager;
   private static Properties properties;
-  private static Cluster cluster;
+  
 
   public static void main(String[] args) {
     properties = System.getProperties();
-    if (properties.get("cassandra.hosts") == null) {
-      logger.warn("cassandra.hosts was not defined setting to localhost:9160");
-      properties.setProperty("cassandra.hosts", "localhost:9160");
-    }
-    cluster = HFactory.getOrCreateCluster("IroncountCluster",
-            new CassandraHostConfigurator(properties.getProperty("cassandra.hosts")));
-
-    DataLayer dl = new DataLayer(cluster);
-    KeyspaceDefinition kd = cluster.describeKeyspace(DataLayer.IRONCOUNT_KEYSPACE);
-    if (kd == null){
-      logger.warn("keyspace does not exist will create.");
-      dl.createMetaInfo();
+    if (properties.get("zk.hosts") == null) {
+      logger.warn("zk.hosts was not defined setting to localhost:9160");
+      properties.setProperty("zkhosts", "localhost:2181");
     }
 
-    workloadManager = new IroncountWorkloadManager(cluster);
+    workloadManager = new WorkloadManager(properties);
     workloadManager.init();
-    workloadManager.execute();
+    //workloadManager.execute();
   }
 }

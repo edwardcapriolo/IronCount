@@ -10,26 +10,27 @@ import org.apache.zookeeper.server.NIOServerCnxn;
 import org.apache.zookeeper.server.ZooKeeperServer;
 
 public class EmbeddedZookeeper {
-  String snapshotDir="/tmp/kzsnap";
-  String logDir="/tmp/zklog";
+
+  String snapshotDir = "/tmp/kzsnap";
+  String logDir = "/tmp/zklog";
   ZooKeeperServer zk;
   ZkClient client;
-   NIOServerCnxn.Factory factory;
-   int port;
+  NIOServerCnxn.Factory factory;
+  int port;
 
   public EmbeddedZookeeper(int port) {
-    this.port=port;
+    this.port = port;
   }
 
-  public void start()throws IOException, InterruptedException{
+  public void start() throws IOException, InterruptedException {
     File sn = new File(snapshotDir);
     sn.mkdir();
     File lg = new File(logDir);
     lg.mkdir();
-    zk = new ZooKeeperServer(sn,lg,3000);
-    factory = new NIOServerCnxn.Factory(new InetSocketAddress("127.0.0.1", port));
+    zk = new ZooKeeperServer(sn, lg, 3000);
+    factory = new NIOServerCnxn.Factory(new InetSocketAddress("localhost", port));
     factory.startup(zk);
-    client = new ZkClient("127.0.0.1:"+port);
+    client = new ZkClient("localhost:" + port);
     client.setZkSerializer(new StringSerializer());
   }
 
@@ -37,16 +38,15 @@ public class EmbeddedZookeeper {
     this.delete(new File(this.logDir));
     this.delete(new File(this.snapshotDir));
   }
-  
-  public void shutdown(){
+
+  public void shutdown() {
     factory.shutdown();
-    //Utils.rm(logDir)
-    //Utils.rm(snapshotDir)
   }
 
   public static void delete(File f) throws IOException {
-    if ( !f.exists() )
+    if (!f.exists()) {
       return;
+    }
     if (f.isDirectory()) {
       for (File c : f.listFiles()) {
         delete(c);
@@ -56,5 +56,4 @@ public class EmbeddedZookeeper {
       throw new FileNotFoundException("Failed to delete file: " + f);
     }
   }
-
 }

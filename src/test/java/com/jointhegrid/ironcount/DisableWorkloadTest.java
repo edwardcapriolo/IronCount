@@ -1,19 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.jointhegrid.ironcount;
 
 import java.util.HashMap;
+import java.util.Properties;
 import kafka.javaapi.producer.ProducerData;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- *
- * @author edward
- */
 public class DisableWorkloadTest extends IronIntegrationTest {
 
   @Test
@@ -29,11 +21,11 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     w.zkConnect = "localhost:8888";
 
     SimpleMessageHandler sh = new SimpleMessageHandler();
-    IroncountWorkloadManager m = new IroncountWorkloadManager(this.cluster);
+    WorkloadManager m = new WorkloadManager(new Properties());
     m.init();
-    m.execute();
 
-    dl.startWorkload(w);
+    //dl.startWorkload(w);
+    m.startWorkload(w);
     try {
       Thread.sleep(3000);
     } catch (InterruptedException ex) {
@@ -49,7 +41,8 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {
     }
 
-    dl.stopWorkload(w);
+    w.active=false;
+    m.stopWorkload(w);
 
      try {
       Thread.sleep(3000);

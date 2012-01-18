@@ -9,36 +9,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
-import com.jointhegrid.ironcount.IronWorker;
-import com.jointhegrid.ironcount.IroncountWorkloadManager;
+import com.jointhegrid.ironcount.WorkloadManager;
 import com.jointhegrid.ironcount.Workload;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Properties;
 import kafka.javaapi.producer.ProducerData;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
-import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
-import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
-import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.beans.Composite;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-/**
- *
- * @author edward
- */
 public class MockingBirdIntegrationTest extends IronIntegrationTest {
 
+  
   @Test
   public void mockingBirdDemo() {
 
@@ -72,17 +59,11 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    //IronWorker iw = new IronWorker();
-    //iw.runDaemon();
-
-    //IronWorker iw2 = new IronWorker();
-    //iw2.runDaemon();
-    IroncountWorkloadManager m = new IroncountWorkloadManager(this.cluster);
+    WorkloadManager m = new WorkloadManager(new Properties());
     m.init();
-    m.execute();
 
-    dl.startWorkload(w);
-
+    m.startWorkload(w);
+    
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/stuff"));
     producer.send(new ProducerData<Integer, String>(topic, "http://toys.ed.com/toys"));
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/"));
@@ -92,8 +73,6 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
-
-    
 
     m.shutdown();
   }

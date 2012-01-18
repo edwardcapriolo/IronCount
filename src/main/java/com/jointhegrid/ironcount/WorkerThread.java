@@ -41,7 +41,8 @@ public class WorkerThread implements Runnable, Watcher{
     workload=w;
     goOn=true;
     try {
-      zk = new ZooKeeper("localhost:8888", 3000, this);
+      zk = new ZooKeeper(
+              m.getProps().getProperty(WorkloadManager.ZK_SERVER_LIST), 3000, this);
      
       wtId = UUID.randomUUID();
     } catch (IOException ex) {

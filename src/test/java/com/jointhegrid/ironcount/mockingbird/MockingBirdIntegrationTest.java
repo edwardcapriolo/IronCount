@@ -59,7 +59,9 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    WorkloadManager m = new WorkloadManager(new Properties());
+    Properties p = System.getProperties();
+    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    WorkloadManager m = new WorkloadManager(p);
     m.init();
 
     m.startWorkload(w);

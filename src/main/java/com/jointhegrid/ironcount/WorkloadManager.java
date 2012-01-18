@@ -42,6 +42,8 @@ public class WorkloadManager implements Watcher {
 
   private WeakHashMap<WorkerThread,Object> workerThreads;
 
+  public static final String ZK_SERVER_LIST="ic.zk.servers";
+
 
   public WorkloadManager(Properties p) {
     this.active = new AtomicBoolean(false);
@@ -54,9 +56,9 @@ public class WorkloadManager implements Watcher {
     active.set(true);
     executor = Executors.newFixedThreadPool(threadPoolSize);
     try {
-      zk = new ZooKeeper("localhost:8888", 100, this);
-      session = new ZkSessionManager("localhost:8888");
-      session.initializeInstance("localhost:8888");
+      zk = new ZooKeeper(props.getProperty( ZK_SERVER_LIST), 100, this);
+      session = new ZkSessionManager( props.getProperty(ZK_SERVER_LIST));
+      session.initializeInstance( props.getProperty(ZK_SERVER_LIST));
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -231,4 +233,13 @@ public class WorkloadManager implements Watcher {
       throw new RuntimeException(ex);
     }
   }
+
+  public Properties getProps() {
+    return props;
+  }
+
+  public void setProps(Properties props) {
+    this.props = props;
+  }
+  
 }

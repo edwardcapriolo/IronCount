@@ -20,8 +20,10 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     w.topic = topic;
     w.zkConnect = "localhost:8888";
 
+    Properties p = new Properties();
+    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
     SimpleMessageHandler sh = new SimpleMessageHandler();
-    WorkloadManager m = new WorkloadManager(new Properties());
+    WorkloadManager m = new WorkloadManager(p);
     m.init();
 
     //dl.startWorkload(w);

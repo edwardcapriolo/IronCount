@@ -70,15 +70,19 @@ public class MockingBirdMessageHandler implements MessageHandler{
   }
 
   public void countIt(String s){
-    System.err.println(s);
-    Composite key = new Composite();
-    key.addComponent(s, StringSerializer.get());
-    key.addComponent(bucketByMinute.format( new Date()), StringSerializer.get());
-    Mutator<Composite> m = HFactory.createMutator(keyspace, new CompositeSerializer());
-    HCounterColumn<String> hc = HFactory.createCounterColumn("count", 1, new StringSerializer());
-    m.addCounter(key, w.properties.get("mocking.ks"), hc);
-    m.execute();
 
+    
+    //Composite key = new Composite();
+    //key.addComponent(s, StringSerializer.get());
+    //key.addComponent(bucketByMinute.format( new Date()), StringSerializer.get());
+    try {
+    Mutator<String> m = HFactory.createMutator(keyspace, StringSerializer.get());
+    HCounterColumn<String> hc = HFactory.createCounterColumn("count", 1L);
+    m.addCounter(s+"/"+bucketByMinute.format( new Date()), 
+            w.properties.get("mocking.cf"), hc);
+    m.execute();
+    System.out.println("incrv"+ s+"/"+bucketByMinute.format( new Date()) );
+    } catch (Exception ex) {System.out.println(ex);}
   }
 
   public static String getMessage(Message message) {

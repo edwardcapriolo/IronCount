@@ -2,14 +2,16 @@ package com.jointhegrid.ironcount;
 
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import kafka.javaapi.producer.ProducerData;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DisableWorkloadTest extends IronIntegrationTest {
+public class StateMachineTest extends IronIntegrationTest {
 
   @Test
-  public void disableWorkload(){
+  public void disableWorkload() {
     Workload w = new Workload();
     w.active = true;
     w.consumerGroup = "group1";
@@ -23,43 +25,52 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     Properties p = new Properties();
     p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
     SimpleMessageHandler sh = new SimpleMessageHandler();
+
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    //dl.startWorkload(w);
     m.startWorkload(w);
     try {
-      Thread.sleep(3000);
+      Thread.sleep(1000);
     } catch (InterruptedException ex) {
     }
-   
+    Assert.assertEquals(1, m.getWorkerThreads().size());
 
     producer.send(new ProducerData<Integer, String>(topic, "1"));
     producer.send(new ProducerData<Integer, String>(topic, "2"));
     producer.send(new ProducerData<Integer, String>(topic, "3"));
 
-    try {
-      Thread.sleep(9000);
-    } catch (InterruptedException ex) {
-    }
-
-    w.active=false;
+    w.active = false;
     m.stopWorkload(w);
 
-     try {
-      Thread.sleep(3000);
+    try {
+      Thread.sleep(1000);
     } catch (InterruptedException ex) {
     }
 
     producer.send(new ProducerData<Integer, String>(topic, "4"));
     producer.send(new ProducerData<Integer, String>(topic, "5"));
+    producer.send(new ProducerData<Integer, String>(topic, "6"));
+
+    m.deleteWorkload(w);
+
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException ex) { }
+    Assert.assertEquals(0, m.getWorkerThreads().size());
+
+    m.startWorkload(w);
+
+    producer.send(new ProducerData<Integer, String>(topic, "7"));
+    producer.send(new ProducerData<Integer, String>(topic, "8"));
+    producer.send(new ProducerData<Integer, String>(topic, "9"));
 
     try {
       Thread.sleep(3000);
-    } catch (InterruptedException ex) {
-    }
+    } catch (InterruptedException ex) { }
 
-    Assert.assertEquals(3,sh.messageCount.get());
+    Assert.assertEquals(9,sh.messageCount.get());
+
     m.shutdown();
   }
 }

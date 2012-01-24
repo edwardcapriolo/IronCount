@@ -14,15 +14,19 @@ public class DeployTool {
 
   final static Logger logger = Logger.getLogger(ICLauncher.class.getName());
   private static Properties properties;
-  private static Cluster cluster;
+  private static WorkloadManager workloadManager;
 
   public static void main(String[] args) {
 
     properties = System.getProperties();
-    if (properties.get("cassandra.hosts") == null) {
-      logger.warn("cassandra.hosts was not defined setting to localhost:9160");
-      properties.setProperty("cassandra.hosts", "localhost:9160");
+    if (properties.get(WorkloadManager.ZK_SERVER_LIST) == null) {
+      logger.warn(WorkloadManager.ZK_SERVER_LIST+" was not defined setting to localhost:2181");
+      properties.setProperty(WorkloadManager.ZK_SERVER_LIST, "localhost:2181");
     }
+
+    workloadManager = new WorkloadManager(properties);
+    workloadManager.init();
+
 
     if (args.length != 2) {
       System.out.println("dump <workloadname>");
@@ -30,15 +34,17 @@ public class DeployTool {
       System.out.println("deploy <workloadfile>");
     }
     if (args[0].equals("deploy")) {
-      //applyWorkload(args[1],dl);
+      applyWorkload(args[1]);
     }
     if (args[0].equals("dump")) {
+
       //for (Workload w : dl.getWorkloads()) {
       //  if (w.name.equals(args[1])) {
       //    dumpWorkload(w);
       //  }
       //}
     }
+    workloadManager.shutdown();
   }
 
   public static void dumpWorkload(Workload w) {
@@ -62,7 +68,7 @@ public class DeployTool {
       System.out.println(ex);
     }
     if (work!=null){
-      //dl.startWorkload(work);
+       workloadManager.startWorkload(work);
     }
   }
 }

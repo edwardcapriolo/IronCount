@@ -2,13 +2,14 @@ package com.jointhegrid.ironcount;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
@@ -40,7 +41,7 @@ public class WorkloadManager implements Watcher {
   private UUID myId;//get this from properties
   private Properties props;
 
-  private WeakHashMap<WorkerThread,Object> workerThreads;
+  private Map<WorkerThread,Object> workerThreads;
 
   public static final String ZK_SERVER_LIST="ic.zk.servers";
 
@@ -49,7 +50,7 @@ public class WorkloadManager implements Watcher {
     this.active = new AtomicBoolean(false);
     props = p;
     myId = UUID.randomUUID();
-    workerThreads = new WeakHashMap<WorkerThread,Object>();
+    workerThreads = new HashMap<WorkerThread,Object>();
   }
 
   public void init() {
@@ -102,6 +103,11 @@ public class WorkloadManager implements Watcher {
         throw new RuntimeException(ex);
       }
     }
+    if (we.getType() == we.getType().NodeDeleted){
+      if (we.getPath().startsWith("/ironcount/workloads")){
+        stopWorkerThreadIfRunning(we.getPath());
+      }
+    }
     if (we.getType() == we.getType().NodeChildrenChanged) {
       if (we.getPath().equals("/ironcount/workloads")) {
         try {
@@ -114,6 +120,21 @@ public class WorkloadManager implements Watcher {
         } catch (InterruptedException ex) {
           throw new RuntimeException(ex);
         }
+      }
+    }
+  }
+
+  public void stopWorkerThreadIfRunning(String child) {
+    String [ ] parts = child.split("/");
+    for (String part:parts){
+      System.out.println(part);
+    }
+    //"/ironcount/workloads/workload"
+    String name = parts[3];
+    for (WorkerThread wt : this.workerThreads.keySet()){
+      if (wt.workload.name.equals(name)){
+        wt.executor.shutdown();
+        wt.goOn=false;
       }
     }
   }
@@ -151,8 +172,7 @@ public class WorkloadManager implements Watcher {
 
   public void considerStartingWorkload(Workload w){
       System.out.println("consider startingWorkload");
-    //in a tx
-    //ZKMultiLock l ;
+    
     ZkMultiPathLock lock = new ZkMultiPathLock();
     lock.addWriteLock("/ironcount/workloads/"+w.name);
     try {
@@ -161,6 +181,7 @@ public class WorkloadManager implements Watcher {
       if (children.size() <= w.maxWorkers){
         WorkerThread wt = new WorkerThread(this,w);
         this.executor.submit(wt);
+        this.workerThreads.put(wt, new Object());
         System.out.println("Put job on executor thread");
       }
     } catch (KeeperException ex) {
@@ -172,9 +193,6 @@ public class WorkloadManager implements Watcher {
     } finally {
       lock.release();
     }
-    //count workloads running kz
-    //if < max start
-    //end tx
   }
 
   public byte[] serializeWorkload(Workload w) {
@@ -225,8 +243,9 @@ public class WorkloadManager implements Watcher {
   public void stopWorkload(Workload w){
     try {
       //byte[] b = zk.getData("/ironcount/workloads/" + workload, false, s);
-      zk.setData("/ironcount/workloads/" + w.name, this.serializeWorkload(w), 0);
-      System.out.println("created node");
+      Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
+      zk.setData("/ironcount/workloads/" + w.name, this.serializeWorkload(w), s.getVersion());
+      System.out.println("stopWorkload");
     } catch (KeeperException ex) {
       throw new RuntimeException(ex);
     } catch (InterruptedException ex) {
@@ -234,6 +253,26 @@ public class WorkloadManager implements Watcher {
     }
   }
 
+  public void deleteWorkload(Workload w) {
+    
+    try {
+
+      List<String> children = zk.getChildren("/ironcount/workloads/" + w.name, false);
+      while (children.size()>0){
+        System.out.println("waiting for children of workload to shutdown");
+        Thread.sleep(1000);
+        children = zk.getChildren("/ironcount/workloads/" + w.name, false);
+      }
+
+      Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
+      Thread.sleep(2000);
+      zk.delete("/ironcount/workloads/" + w.name, s.getVersion());
+    } catch (InterruptedException ex) {
+        throw new RuntimeException(ex);
+    } catch (KeeperException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
   public Properties getProps() {
     return props;
   }
@@ -241,5 +280,13 @@ public class WorkloadManager implements Watcher {
   public void setProps(Properties props) {
     this.props = props;
   }
-  
+
+  public Map<WorkerThread, Object> getWorkerThreads() {
+    return workerThreads;
+  }
+
+  public void setWorkerThreads(WeakHashMap<WorkerThread, Object> workerThreads) {
+    this.workerThreads = workerThreads;
+  }
+ 
 }

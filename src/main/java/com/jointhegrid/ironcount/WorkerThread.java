@@ -85,7 +85,7 @@ public class WorkerThread implements Runnable, Watcher{
     props.put("zk.connect", workload.zkConnect);
     config = new ConsumerConfig(props);
     consumerConnector = Consumer.createJavaConsumerConnector(config);
-
+    
     try {
       handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {

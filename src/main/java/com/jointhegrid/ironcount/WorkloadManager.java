@@ -76,6 +76,9 @@ public class WorkloadManager implements Watcher {
       zk.create("/ironcount/workers/"+myId.toString(), new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
       zk.exists("/ironcount/workloads", this);
       System.out.println("created");
+
+      List<String> children = zk.getChildren("/ironcount/workloads", false);
+      considerStarting(children);
     } catch (KeeperException ex) {
       throw new RuntimeException(ex);
     } catch (InterruptedException ex) {

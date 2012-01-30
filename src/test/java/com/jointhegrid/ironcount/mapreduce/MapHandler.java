@@ -26,24 +26,44 @@ public class MapHandler implements MessageHandler {
 
   @Override
   public void setWorkload(Workload w) {
+
     this.w=w;
 
     producerProps = new Properties();
     producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
     producerProps.put("zk.connect", w.properties.get("zk.connect"));
 
-    producer = new Producer<Integer,String>(producerConfig);
+     System.out.println( w.properties.get("zk.connect") );
+    producerConfig = new ProducerConfig(producerProps);
+    producer = new Producer<String,String>(producerConfig);
+
   }
 
   @Override
   public void handleMessage(Message m) {
+    //message looks like this
+    //users|1:edward
+    //or
+    //cart|1:saw
     String line = getMessage(m);
-    String[] parts = line.split("|");
-    String key = parts[0];
-    String value = parts[1];
-   
+    System.out.println("mapper "+line);
+    String[] parts = line.split("\\|");
+    String table = parts[0];
+    String row = parts[1];
+    String [] columns = row.split(":");
+
+    //results look like this
+    //Partitioner (1) users|1:edward
+    //or
+    //partitioner (1) cart|1:saw
+
     producer.send(new ProducerData<String, String>
-            ("reduce", key, Arrays.asList(key+"|"+1)));
+            ("reduce", columns[0], Arrays.asList(table+"|"+row)));
+
+    //producer.send(new ProducerData<String, String>
+    //        ("reduce", table+"|"+row));
+    
+
   }
 
   @Override

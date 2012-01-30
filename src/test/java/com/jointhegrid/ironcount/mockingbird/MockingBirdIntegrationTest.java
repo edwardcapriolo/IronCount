@@ -88,16 +88,6 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-
-    /*
-    ColumnFamilyTemplate<String,String> template =
-            new ThriftColumnFamilyTemplate<String,String>(moch,"mockingbird"
-            ,StringSerializer.get(),StringSerializer.get());
-    ColumnFamilyResult<String,String> res =template.queryColumns
-            ("com/"+  new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date()));
-     *
-     */
-
     CounterQuery <String, String> mcq = new ThriftCounterColumnQuery<String,String>
             (moch,StringSerializer.get(),StringSerializer.get());
 

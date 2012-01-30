@@ -23,30 +23,6 @@ import org.apache.zookeeper.data.Stat;
 
 public class WorkerThread implements Runnable, Watcher{
 
-  @Override
-  public void process(WatchedEvent we) {
-    System.out.println("Worker Thread----------------------"+we);
-    if (we.getType()== EventType.NodeDataChanged){
-     if (we.getPath().equals("/ironcount/workloads/"+ this.workload.name)){
-        System.out.println("my workload changed----------------------");
-        try {
-          //reconsitute workload
-          Stat s = zk.exists("/ironcount/workloads/" + this.workload.name, false);
-          byte [] dat = zk.getData("/ironcount/workloads/"+ this.workload.name, false, s);
-          Workload w = this.m.deserializeWorkload(dat);
-          if (w.active.equals(Boolean.FALSE)){
-            this.goOn=false;
-            this.executor.shutdown();
-            System.out.println("shuting myself down");
-          }
-        } catch (KeeperException ex) {
-          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
-        }
-      }
-    }
-  }
   
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
@@ -74,6 +50,31 @@ public class WorkerThread implements Runnable, Watcher{
       wtId = UUID.randomUUID();
     } catch (IOException ex) {
       Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+
+   @Override
+  public void process(WatchedEvent we) {
+    System.out.println("Worker Thread----------------------"+we);
+    if (we.getType()== EventType.NodeDataChanged){
+     if (we.getPath().equals("/ironcount/workloads/"+ this.workload.name)){
+        System.out.println("my workload changed----------------------");
+        try {
+          //reconsitute workload
+          Stat s = zk.exists("/ironcount/workloads/" + this.workload.name, false);
+          byte [] dat = zk.getData("/ironcount/workloads/"+ this.workload.name, false, s);
+          Workload w = this.m.deserializeWorkload(dat);
+          if (w.active.equals(Boolean.FALSE)){
+            this.goOn=false;
+            this.executor.shutdown();
+            System.out.println("shuting myself down");
+          }
+        } catch (KeeperException ex) {
+          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
     }
   }
 

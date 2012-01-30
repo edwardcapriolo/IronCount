@@ -61,8 +61,8 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
     consumerConfig = new ConsumerConfig(consumerProps);
     producerConfig = new ProducerConfig(producerProps);
 
-    brokerProps.setProperty("topic.partition.count.map", topic+":2");
-    brokerProps.setProperty("num.partitions", "2");
+    brokerProps.setProperty("topic.partition.count.map", topic+":2"+",map:2,reduce:2");
+    brokerProps.setProperty("num.partitions", "10");
     brokerProps.setProperty("brokerid", "1");
     brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
 

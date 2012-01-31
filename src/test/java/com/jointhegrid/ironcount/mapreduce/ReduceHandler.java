@@ -3,14 +3,9 @@ package com.jointhegrid.ironcount.mapreduce;
 import com.jointhegrid.ironcount.MessageHandler;
 import com.jointhegrid.ironcount.WorkerThread;
 import com.jointhegrid.ironcount.Workload;
-import com.jointhegrid.ironcount.mockingbird.CounterBatcher;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import kafka.message.Message;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
@@ -21,8 +16,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
 
 public class ReduceHandler implements MessageHandler {
 
-  HashMap<String,ArrayList<String>> data = new HashMap<String,ArrayList<String>>();
-    Cluster cluster ;
+  HashMap<User,ArrayList<Item>> data = new HashMap<User,ArrayList<Item>>();
+  Cluster cluster;
   Keyspace keyspace;
   Workload w;
 
@@ -32,8 +27,8 @@ public class ReduceHandler implements MessageHandler {
 
   @Override
   public void setWorkload(Workload w) {
-    this.w=w;
-     cluster = HFactory.getOrCreateCluster("mr", w.properties.get("mr.cas"));
+    this.w = w;
+    cluster = HFactory.getOrCreateCluster("mr", w.properties.get("mr.cas"));
     keyspace = HFactory.createKeyspace(w.properties.get("mr.ks"), cluster);
   }
 
@@ -46,45 +41,54 @@ public class ReduceHandler implements MessageHandler {
     String row = parts[1];
     String [] columns = row.split(":");
 
-    //id                                  //name      //cost
-    if (data.containsKey(columns[0])){
-       data.get(columns[0]).add(table+":"+columns[1]);
-    } else {
-      data.put(columns[0], new ArrayList<String>());
-      data.get(columns[0]).add(table+":"+columns[1]);
+    if (table.equals("user")) {
+      User u = new User();
+      u.parse(columns);
+      if (! data.containsKey(u)){
+        data.put(u, new ArrayList<Item>());
+        System.out.println("added user "+u.name + " "+u.id);
+      }
+    } else if ( table.equals("cart")){
+
+      Item i = new Item();
+      i.parse(columns);
+      System.out.println("adding car " + i.itemName + " "+i.userfk);
+      for (User u : data.keySet()){
+        if (u.id==i.userfk){
+          data.get(u).add(i);
+          //counter (items for user)
+          incrementItemCounter(u);
+          //count ($ spent by user)
+          incrementDollarByUser(u,i);
+          System.out.println("done with increments");
+        }
+      }
     }
+  }
 
-    for (Map.Entry<String,ArrayList<String>> entry: data.entrySet()){
-      List<String> citems = new ArrayList<String>();
-      for (String s : entry.getValue()){
-        if ( s.split(":")[0].equals("cart") ){
-          citems.add( s.split(":")[1] );
-        }
-      }
-      String name=null;
-      for (String s : entry.getValue()){
-        if ( s.split(":")[0].equals("users") ){
-          name= s.split(":")[1] ;
-        }
-      }
 
-      try {
-        for (String item:citems){
-          Mutator<String> mut = HFactory.createMutator(keyspace,
-                  StringSerializer.get());
-          HCounterColumn<String> hc = HFactory.createCounterColumn(item, 1L);
-          mut.addCounter(name, w.properties.get("mr.cf"), hc);
-          mut.execute();
-        }
-      } catch (Exception ex) {
-        System.out.println(ex);
-      }
-
+  public void incrementItemCounter(User u){
+    try {
+      Mutator<String> mut = HFactory.createMutator(keyspace,
+              StringSerializer.get());
+      HCounterColumn<String> hc = HFactory.createCounterColumn("count", 1L);
+      mut.addCounter(u.name, "itemcountbyuser", hc);
+      mut.execute();
+    } catch (Exception ex) {
+      System.out.println(ex);
     }
+  }
 
-    //System.out.println("reducer line:"+line);
-    //producer.send(new ProducerData<String, String>
-    //        ("reduce", key, Arrays.asList(value)));
+  public void incrementDollarByUser(User u, Item i){
+    try {
+      Mutator<String> mut = HFactory.createMutator(keyspace,
+              StringSerializer.get());
+      HCounterColumn<String> hc = HFactory.createCounterColumn("spent", i.price.intValue());
+      mut.addCounter(u.name, "dollarbyuser", hc);
+      mut.execute();
+    } catch (Exception ex) {
+      System.out.println(ex);
+    }
   }
 
   @Override

@@ -12,13 +12,17 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import junit.framework.Assert;
 import kafka.javaapi.producer.ProducerData;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
+import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import org.junit.Test;
 
@@ -31,13 +35,21 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
   @Test
   public void mapReduceJoin() {
 
-    KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mockingbird");
+     KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mr");
     cluster.addKeyspace(ksDef, true);
-    Keyspace moch = HFactory.createKeyspace("mockingbird", cluster);
-    CqlQuery<String, String, String> cqlQuery = new CqlQuery<String, String, String>(moch, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
-    cqlQuery.setQuery("create columnfamily mrjoin (key 'org.apache.cassandra.db.marshal.UTF8Type' primary key) with  "
-            + "comparator = 'org.apache.cassandra.db.marshal.UTF8Type' ");
+    Keyspace mr = HFactory.createKeyspace("mr", cluster);
+    CqlQuery<String, String, String> cqlQuery = new CqlQuery<String, String, String>(mr, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
+    cqlQuery.setQuery("create columnfamily dollarbyuser (key 'org.apache.cassandra.db.marshal.UTF8Type' primary key) with  "
+            + "comparator = 'org.apache.cassandra.db.marshal.UTF8Type' "
+            + "and default_validation = 'CounterColumnType' ");
     QueryResult<CqlRows<String, String, String>> result = cqlQuery.execute();
+
+    cqlQuery = new CqlQuery<String, String, String>(mr, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
+    cqlQuery.setQuery("create columnfamily itemcountbyuser (key 'org.apache.cassandra.db.marshal.UTF8Type' primary key) with  "
+            + "comparator = 'org.apache.cassandra.db.marshal.UTF8Type' "
+            + "and default_validation = 'CounterColumnType' ");
+    result = cqlQuery.execute();
+
    
     Workload reducer = new Workload();
     reducer.active = true;
@@ -47,6 +59,10 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
 
     reducer.name = "reduce";
     reducer.properties = new HashMap<String, String>();
+
+    reducer.properties.put("mr.cas", "localhost:9157");
+    reducer.properties.put("mr.ks", "mr");
+
     reducer.topic = "reduce";
     reducer.zkConnect = "localhost:8888";
 
@@ -62,15 +78,6 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
     mapper.zkConnect = "localhost:8888";
 
 
-        Workload w = new Workload();
-    w.active = true;
-    w.consumerGroup = "group1";
-    w.maxWorkers = 4;
-    w.messageHandlerName = "com.jointhegrid.ironcount.SimpleMessageHandler";
-    w.name = "testworkload";
-    w.properties = new HashMap<String, String>();
-    w.topic = topic;
-    w.zkConnect = "localhost:8888";
 
     Properties p = System.getProperties();
     p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
@@ -79,7 +86,7 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
 
     m.startWorkload(mapper);
     m.startWorkload(reducer);
-    m.startWorkload(w);
+
     try {
       Thread.sleep(5000);
     } catch (InterruptedException ex) {
@@ -91,9 +98,9 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
    // producer.send(new ProducerData<Integer, String>(topic, "2"));
    // producer.send(new ProducerData<Integer, String>(topic, "3"));
 
-    producer.send(new ProducerData<Integer, String>("map", "users|1:edward"));
-    producer.send(new ProducerData<Integer, String>("map", "users|2:nate"));
-    producer.send(new ProducerData<Integer, String>("map", "users|3:stacey"));
+    producer.send(new ProducerData<Integer, String>("map", "user|1:edward"));
+    producer.send(new ProducerData<Integer, String>("map", "user|2:nate"));
+    producer.send(new ProducerData<Integer, String>("map", "user|3:stacey"));
 
     producer.send(new ProducerData<Integer, String>("map", "cart|1:saw:2.00"));
     producer.send(new ProducerData<Integer, String>("map", "cart|1:hammer:3.00"));
@@ -106,5 +113,16 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {
       Logger.getLogger(MapReduceJoinIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
+
+    CounterQuery<String, String> mcq = new ThriftCounterColumnQuery
+            <String, String>(mr, StringSerializer.get(), StringSerializer.get());
+
+    mcq.setKey("edward");
+    mcq.setColumnFamily("dollarbyuser");
+    mcq.setName("spent");
+
+    QueryResult<HCounterColumn<String>> res = mcq.execute();
+    Assert.assertEquals(new Long(5), res.get().getValue());
+
   }
 }

@@ -21,7 +21,7 @@ A Workload is an object that stores several pieces of information.
 * properties: A map of properties that can be used for configuration
 * active: a flag to start or pause workloads
 
-In a serialized from it looks like this:
+In a serialized form it looks like this:
 
     {"name":"testworkload"
       ,"topic":"topic1"

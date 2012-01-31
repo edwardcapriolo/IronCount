@@ -117,7 +117,12 @@ public class WorkerThread implements Runnable, Watcher{
       executor.submit(new Runnable() {
         public void run() {
           for(Message message: stream) {
-            handler.handleMessage(message);
+            try {
+              handler.handleMessage(message);
+            } catch (Exception ex){
+              logger.error("worker thread fired exception "+workload+" "+ex);
+              goOn=false;
+            }
           }
         }
       });

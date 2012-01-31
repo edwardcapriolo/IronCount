@@ -3,11 +3,11 @@ package com.jointhegrid.ironcount.eventtofile;
 import com.jointhegrid.ironcount.MessageHandler;
 import com.jointhegrid.ironcount.WorkerThread;
 import com.jointhegrid.ironcount.Workload;
-import com.jointhegrid.ironcount.mockingbird.MockingBirdMessageHandler;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.nio.ByteBuffer;
 
 import kafka.message.Message;
 import org.apache.log4j.Logger;
@@ -32,7 +32,7 @@ public class MessageToFileHandler implements MessageHandler {
 
   @Override
   public void handleMessage(Message m) {
-    String s = MockingBirdMessageHandler.getMessage(m);
+    String s = getMessage(m);
     try {
       fw.write(s+"\n");
       fw.flush();
@@ -54,5 +54,12 @@ public class MessageToFileHandler implements MessageHandler {
     } catch (IOException ex) {
       logger.error(ex);
     }
+  }
+
+    public static String getMessage(Message message) {
+    ByteBuffer buffer = message.payload();
+    byte[] bytes = new byte[buffer.remaining()];
+    buffer.get(bytes);
+    return new String(bytes);
   }
 }

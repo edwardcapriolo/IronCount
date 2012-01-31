@@ -67,4 +67,37 @@ once. Then each kafka message is passed to the `handleMessage(Message m)` method
       }
     }
 
+Demos
+-----
 
+IronCount has some build in demo's to show it's usefulness. The first is MockingBird, which offers Rainbird 
+style URL counting, and data persistance to Cassandra. See `com.jointhegrid.ironcount.mockingbird.*` in the 
+test packages.
+
+    public void handleMessage(Message m) {
+      String url = getMessage(m);
+      URI i = URI.create(url);
+      String domain = i.getHost();
+      String path = i.getPath();
+      String[] parts = domain.split("\\.");
+      Stack<String> s = new Stack<String>();
+      s.add(path);
+      s.addAll(Arrays.asList(parts));
+      StringBuilder sb = new StringBuilder();
+
+      for (int j = 0; j <= parts.length; j++) {
+        sb.append(s.pop());
+        countIt(sb.toString());//write to C*
+        sb.append(":");
+      }
+    }
+
+The framework takes care of the transport and queuing and allows the user to focus on application logic.
+
+The second demo is a Join similar to s4's join demo. This one is implemented with two Kafka queues,
+a queue named `map` and a queue named `reduce`. The `MapHandler` handlesMessages from the map queue, processes
+them and then send them to the reduce queue. Kafka has the notion of partitioners and the join key
+is used internally to route messages for the same user_id to the same handler.  The ReduceHandler writes
+partial aggreggations as Cassandra counters made possible by Kafka's underlying partitioning. This system 
+where one Workload creates data for another can be viewed as a pipe or a feedback loop.
+ See `com.jointhegrid.ironcount.mapreduce` for example code.

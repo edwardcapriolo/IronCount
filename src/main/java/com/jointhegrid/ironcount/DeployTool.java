@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import me.prettyprint.hector.api.Cluster;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
@@ -35,14 +34,12 @@ public class DeployTool {
     }
     if (args[0].equals("deploy")) {
       applyWorkload(args[1]);
-    }
-    if (args[0].equals("dump")) {
-
-      //for (Workload w : dl.getWorkloads()) {
-      //  if (w.name.equals(args[1])) {
-      //    dumpWorkload(w);
-      //  }
-      //}
+    } else if (args[0].equals("dump")) {
+      for (Workload w : workloadManager.getAllWorkloads()){
+        if (w.name.equals(args[1])) {
+          dumpWorkload(w);
+        }
+      }
     }
     workloadManager.shutdown();
   }

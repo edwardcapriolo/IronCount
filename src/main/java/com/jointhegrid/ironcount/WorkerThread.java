@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -29,10 +27,10 @@ public class WorkerThread implements Runnable, Watcher{
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
   Workload workload;
-  ConsumerConnector consumerConnector;
-  ConsumerConfig config;
-  MessageHandler handler;
-  Properties props;
+  public ConsumerConnector consumerConnector;
+  public ConsumerConfig config;
+  public MessageHandler handler;
+  public Properties props;
   boolean goOn;
   private WorkloadManager m;
   UUID wtId;

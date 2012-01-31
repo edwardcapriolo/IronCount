@@ -2,6 +2,7 @@ package com.jointhegrid.ironcount;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -251,6 +252,24 @@ public class WorkloadManager implements Watcher {
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  public List<Workload> getAllWorkloads() {
+    List<Workload> all = new ArrayList<Workload>();
+    try {
+      List<String> children = zk.getChildren("/ironcount/workloads/", false);
+      for (String child : children) {
+        Stat s = zk.exists("/ironcount/workloads/" + child, false);
+        byte[] b = zk.getData("/ironcount/workloads/" + child, false, s);
+        Workload w = this.deserializeWorkload(b);
+        all.add(w);
+      }
+    } catch (KeeperException ex) {
+      throw new RuntimeException(ex);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+    return all;
   }
 
   public void deleteWorkload(Workload w) {

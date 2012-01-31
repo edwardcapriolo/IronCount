@@ -15,7 +15,7 @@ A Workload is an object that stores several pieces of information.
 
 * name: System wide unique name for the Workload
 * topic: Name of the Kafka topic this handler will get data from
-* messageHandlerName: Class that implements MessageHandler interface
+* messageHandlerName: Class that implements MessageHandler interface 
 * zkConnect: Information to connect to zookeeper
 * maxWorkers: Maximum number of instances of MessageHander to run across the cluster
 * properties: A map of properties that can be used for configuration

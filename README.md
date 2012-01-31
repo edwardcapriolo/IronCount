@@ -100,4 +100,70 @@ them and then send them to the reduce queue. Kafka has the notion of partitioner
 is used internally to route messages for the same user_id to the same handler.  The ReduceHandler writes
 partial aggreggations as Cassandra counters made possible by Kafka's underlying partitioning. This system 
 where one Workload creates data for another can be viewed as a pipe or a feedback loop.
- See `com.jointhegrid.ironcount.mapreduce` for example code.
+
+    @Override
+    public void setWorkload(Workload w) {
+      this.w=w;
+      producerProps = new Properties();
+      producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
+      producerProps.put("zk.connect", w.properties.get("zk.connect"));
+      producerConfig = new ProducerConfig(producerProps);
+      producer = new Producer<String,String>(producerConfig);
+    }
+
+    @Override
+    public void handleMessage(Message m) {
+      //message looks like this
+      //users|1:edward
+      //or
+      //cart|1:saw
+      String line = getMessage(m);
+      String[] parts = line.split("\\|");
+      String table = parts[0];
+      String row = parts[1];
+      String [] columns = row.split(":");
+
+      //results look like this
+      //Partitioner (1) users|1:edward
+      //or
+      //partitioner (1) cart|1:saw
+
+      producer.send(new ProducerData<String, String>
+        ("reduce", columns[0], Arrays.asList(table+"|"+row)));
+    }
+
+ Kafka has the notion of partitioners and the join key is used internally to route 
+messages for the same user_id to the same handler.  The ReduceHandler writes
+partial aggreggations as Cassandra counters made possible by Kafka's underlying partitioning. This system 
+where one Workload creates data for another can be viewed as a pipe or a feedback loop.
+
+    @Override
+    public void handleMessage(Message m) {
+      String line = getMessage(m);
+      String[] parts = line.split("\\|");
+      String table = parts[0];
+      String row = parts[1];
+      String [] columns = row.split(":");
+
+      if (table.equals("user")) {
+        User u = new User();
+        u.parse(columns);
+        if (! data.containsKey(u)){
+          data.put(u, new ArrayList<Item>());
+        }
+      } else if ( table.equals("cart")){
+        Item i = new Item();
+        i.parse(columns);
+        for (User u : data.keySet()){
+          if (u.id==i.userfk){
+            data.get(u).add(i);
+            //counter (items for user)
+            incrementItemCounter(u);
+            //count ($ spent by user)
+            incrementDollarByUser(u,i);
+          }
+        }
+      }
+    }
+
+See `com.jointhegrid.ironcount.mapreduce` for example code.

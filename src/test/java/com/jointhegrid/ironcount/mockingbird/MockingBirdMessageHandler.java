@@ -46,9 +46,7 @@ public class MockingBirdMessageHandler implements MessageHandler{
    incr com/domain by 1
    incr com/domain/sub by 1
    incr com/domain/sub/myurl.s by 1
-
    */
-
   public void handleMessage(Message m) {
 
     String url = getMessage(m);

@@ -33,6 +33,10 @@ In a serialized from it looks like this:
       ,"active":true
     }
 
+To start a Workload create a JSON clob like the one above and save it to a file. Then use
+Deploy tool to write this entry to ZooKeeper. At this point WorkloadManagers should notice
+the changes to zookeeper and start instances of the Workload.
+
 Extending
 -----
 

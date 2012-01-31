@@ -6,7 +6,7 @@ IronCount provides a framework to manage consumers of Kafka message queues acros
 Usage
 -----
 
-package com.jointhegrid.ironcount.mockingbird;
+`package com.jointhegrid.ironcount.mockingbird;
 
 import com.jointhegrid.ironcount.MessageHandler;
 import com.jointhegrid.ironcount.WorkerThread;
@@ -28,5 +28,5 @@ public class MessageHandlerExt implements MessageHandler{
   @Override
   public void setWorkerThread(WorkerThread wt) {
   }
-}
+}`
 

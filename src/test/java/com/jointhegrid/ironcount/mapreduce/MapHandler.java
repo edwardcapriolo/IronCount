@@ -1,3 +1,18 @@
+/*
+Copyright 2011 Edward Capriolo
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.jointhegrid.ironcount.mapreduce;
 
 import com.jointhegrid.ironcount.MessageHandler;
@@ -26,17 +41,12 @@ public class MapHandler implements MessageHandler {
 
   @Override
   public void setWorkload(Workload w) {
-
     this.w=w;
-
     producerProps = new Properties();
     producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
     producerProps.put("zk.connect", w.properties.get("zk.connect"));
-
-     System.out.println( w.properties.get("zk.connect") );
     producerConfig = new ProducerConfig(producerProps);
     producer = new Producer<String,String>(producerConfig);
-
   }
 
   @Override
@@ -46,7 +56,6 @@ public class MapHandler implements MessageHandler {
     //or
     //cart|1:saw
     String line = getMessage(m);
-    System.out.println("mapper "+line);
     String[] parts = line.split("\\|");
     String table = parts[0];
     String row = parts[1];
@@ -59,10 +68,6 @@ public class MapHandler implements MessageHandler {
 
     producer.send(new ProducerData<String, String>
             ("reduce", columns[0], Arrays.asList(table+"|"+row)));
-
-    //producer.send(new ProducerData<String, String>
-    //        ("reduce", table+"|"+row));
-    
 
   }
 

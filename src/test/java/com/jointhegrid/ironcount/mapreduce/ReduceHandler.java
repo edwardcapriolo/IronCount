@@ -46,13 +46,10 @@ public class ReduceHandler implements MessageHandler {
       u.parse(columns);
       if (! data.containsKey(u)){
         data.put(u, new ArrayList<Item>());
-        System.out.println("added user "+u.name + " "+u.id);
       }
     } else if ( table.equals("cart")){
-
       Item i = new Item();
       i.parse(columns);
-      System.out.println("adding car " + i.itemName + " "+i.userfk);
       for (User u : data.keySet()){
         if (u.id==i.userfk){
           data.get(u).add(i);
@@ -60,7 +57,6 @@ public class ReduceHandler implements MessageHandler {
           incrementItemCounter(u);
           //count ($ spent by user)
           incrementDollarByUser(u,i);
-          System.out.println("done with increments");
         }
       }
     }

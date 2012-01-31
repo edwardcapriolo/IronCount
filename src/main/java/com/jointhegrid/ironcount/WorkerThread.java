@@ -5,13 +5,14 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaMessageStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
+import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -23,6 +24,7 @@ import org.apache.zookeeper.data.Stat;
 
 public class WorkerThread implements Runnable, Watcher{
 
+  final static Logger logger = Logger.getLogger(WorkerThread.class.getName());
   
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
@@ -46,33 +48,31 @@ public class WorkerThread implements Runnable, Watcher{
     try {
       zk = new ZooKeeper(
               m.getProps().getProperty(WorkloadManager.ZK_SERVER_LIST), 3000, this);
-     
       wtId = UUID.randomUUID();
     } catch (IOException ex) {
-      Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+      throw new RuntimeException(ex);
     }
   }
 
    @Override
   public void process(WatchedEvent we) {
-    System.out.println("Worker Thread----------------------"+we);
+    logger.debug(we);
     if (we.getType()== EventType.NodeDataChanged){
      if (we.getPath().equals("/ironcount/workloads/"+ this.workload.name)){
-        System.out.println("my workload changed----------------------");
+        logger.debug("change detected "+we);
         try {
-          //reconsitute workload
           Stat s = zk.exists("/ironcount/workloads/" + this.workload.name, false);
           byte [] dat = zk.getData("/ironcount/workloads/"+ this.workload.name, false, s);
           Workload w = this.m.deserializeWorkload(dat);
           if (w.active.equals(Boolean.FALSE)){
             this.goOn=false;
             this.executor.shutdown();
-            System.out.println("shuting myself down");
+            logger.debug("Shutdown");
           }
         } catch (KeeperException ex) {
-          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+          throw new RuntimeException (ex);
         } catch (InterruptedException ex) {
-          Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+          throw new RuntimeException (ex);
         }
       }
     }
@@ -113,19 +113,6 @@ public class WorkerThread implements Runnable, Watcher{
     List<KafkaMessageStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
 
-    
-
-    /*
-    for (KafkaMessageStream<Message> stream:streams){
-      ConsumerIterator<Message> it= stream.iterator();
-      status=WorkerThreadStatus.RUNNING;
-      while (goOn && it.hasNext() ){
-        handler.handleMessage(it.next());
-
-      }
-    }
-     *
-     */
     for(final KafkaMessageStream<Message> stream: streams) {
       executor.submit(new Runnable() {
         public void run() {
@@ -140,16 +127,16 @@ public class WorkerThread implements Runnable, Watcher{
       try {
         Thread.sleep(1);
       } catch (InterruptedException ex) {
-        Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+        throw new RuntimeException(ex);
       }
     }
 
-    System.err.println("thread end");
+    logger.debug("thread end");
     try {
       this.m.getWorkerThreads().remove(this);
       this.zk.close();
     } catch (InterruptedException ex) {
-      Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+      throw new RuntimeException(ex);
     }
     status=WorkerThreadStatus.DONE;
   }

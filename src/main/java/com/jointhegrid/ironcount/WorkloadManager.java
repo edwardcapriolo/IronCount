@@ -221,7 +221,7 @@ public class WorkloadManager implements Watcher {
     try {
       map.writeValue(baos, w);
     } catch (IOException ex) {
-      System.out.println(ex);
+      logger.error(ex);
     }
     return baos.toByteArray();
   }

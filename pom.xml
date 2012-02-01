@@ -110,7 +110,10 @@
               <configuration>
                   <programs>
                       <program>
-                          <mainClass>com.jointhegrid.ironcount.IroncountCli</mainClass>
+                          <!--<mainClass>com.jointhegrid.ironcount.IroncountCli</mainClass>
+                          Not sure that Cli is working ATM
+                          -->
+                          <mainClass>com.jointhegrid.ironcount.ICLauncher</mainClass>
                           <name>ironcount</name>
                       </program>
                   </programs>

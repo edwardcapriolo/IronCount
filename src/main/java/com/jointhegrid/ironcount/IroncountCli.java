@@ -33,51 +33,40 @@ import org.apache.log4j.Logger;
 public class IroncountCli {
 
   final static Logger logger = Logger.getLogger(IroncountCli.class.getName());
-
   private static WorkloadManager workloadManager;
   private static Properties properties;
-  private static Cluster cluster;
 
-  public static void main(String [] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     properties = System.getProperties();
-    if (properties.get("cassandra.hosts") == null){
-      logger.warn("cassandra.hosts was not defined setting to localhost:9160");
-      properties.setProperty("cassandra.hosts", "localhost:9160");
+    if (properties.get(WorkloadManager.ZK_SERVER_LIST) == null) {
+      logger.warn(WorkloadManager.ZK_SERVER_LIST + " was not defined setting to localhost:2181");
+      properties.setProperty(WorkloadManager.ZK_SERVER_LIST, "localhost:2181");
     }
-    cluster = HFactory.createCluster("IroncountCluster",
-            new CassandraHostConfigurator(properties.getProperty("cassandra.hosts")));
-    
+    workloadManager = new WorkloadManager(properties);
     // TODO parse & apply parameters from CLI
     // TODO push through config properties file
     IroncountCli ic = new IroncountCli();
 
-    ic.doExecute();
-
+    //ic.doExecute();
+ 
     logger.warn("starting console reader");
     ConsoleReader reader = new ConsoleReader();
 
     String line;
     while ((line = reader.readLine("[ironcount] ")) != null) {
-      if ( line.equalsIgnoreCase("exit") ) {
+      if (line.equalsIgnoreCase("exit")) {
         System.exit(0);
-      } else if ( line.equalsIgnoreCase("stop") ) {
-      reader.printString("Stopping ironcount workload manager...");
-      workloadManager.shutdown();
-      reader.printString("Stopped. \n");
-    } else if ( line.equalsIgnoreCase("start") ) {
-      reader.printString("Starting ironcount workload manager...");
-      workloadManager.init();
-      reader.printString("OK \n");
-    }
+      } else if (line.equalsIgnoreCase("stop")) {
+        reader.printString("Stopping ironcount workload manager...");
+        workloadManager.shutdown();
+        reader.printString("Stopped. \n");
+      } else if (line.equalsIgnoreCase("start")) {
+        reader.printString("Starting ironcount workload manager...");
+        workloadManager.init();
+        reader.printString("OK \n");
+      }
       processArgs(line.split(" "), reader);
     }
-  }
-
-  private void doExecute() {
-    // initialize IroncountWorkloadManager
- //   workloadManager = new IroncountWorkloadManager(cluster);
-    workloadManager.init();
-    // produce output
   }
 
   private static Options buildOptions() {

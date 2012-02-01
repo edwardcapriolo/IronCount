@@ -53,14 +53,8 @@
         </exclusion>
       </exclusions>
     </dependency>
+    
 
-
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.8.1.2</version>
-    </dependency>
-      
     <dependency>
       <groupId>me.prettyprint</groupId>
       <artifactId>hector-core</artifactId>
@@ -133,7 +127,11 @@
                   </execution>
               </executions>
           </plugin>
-
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <version>2.4</version>
+          </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -148,4 +146,5 @@
       <url>http://clojars.org/repo</url>
     </repository>
   </repositories>
+
 </project>

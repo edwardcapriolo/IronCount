@@ -95,9 +95,9 @@ test packages.
 
 The framework takes care of the transport of messages and allows the user to focus on application logic.
 
-The second demo is a Join similar to s4's join demo. This one is implemented with two Kafka queues,
-a queue named `map` and a queue named `reduce`. The `MapHandler` handles messages from the map queue, processes
-them and then send them to the `reduce` queue. 
+The second demo is a Join similar to s4's join demo. This one is implemented with two Kafka topics,
+a topic named `map` and a topic named `reduce`. The `MapHandler` handles messages from the map topic, processes
+them and then send them to the `reduce` topic. 
 
     @Override
     public void setWorkload(Workload w) {
@@ -131,7 +131,7 @@ them and then send them to the `reduce` queue.
     }
 
 Kafka has the notion of partitioners and the join key is used internally to route 
-messages for the same user_id to the same partition.  The ReduceHandler writes
+messages for the same user_id to the same partition of a topic.  The ReduceHandler writes
 partial aggreggations as Cassandra counters made possible by Kafka's underlying partitioning. 
 
 In this example the map Workload creates data for the reduce Workload. You can imagine this

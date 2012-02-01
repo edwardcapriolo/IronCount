@@ -131,7 +131,9 @@ public class WorkerThread implements Runnable, Watcher{
         public void run() {
           for(Message message: stream) {
             try {
-              handler.handleMessage(message);
+              if (goOn){
+                handler.handleMessage(message);
+              }
             } catch (Exception ex){
               logger.error("worker thread fired exception "+workload+" "+ex);
               goOn=false;
@@ -153,6 +155,8 @@ public class WorkerThread implements Runnable, Watcher{
     try {
       this.m.getWorkerThreads().remove(this);
       this.zk.close();
+      executor.shutdown();
+      logger.debug("thread tear down");
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }

@@ -233,7 +233,7 @@ public class WorkloadManager implements Watcher {
     try {
       work = (Workload) m.readValue(new String(b), t);
     } catch (IOException ex) {
-      System.out.println(ex);
+      logger.error(ex);
     }
     return work;
   }

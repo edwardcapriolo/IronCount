@@ -167,3 +167,42 @@ as a pipe or a feedback loop.
     }
 
 See `com.jointhegrid.ironcount.mapreduce` for example code.
+
+Unit Tests
+-----
+
+Currently IronCount has integration tests. Tests are passing when run one at a time.
+Many of the services started by the integration tests have re-entrant code
+sections they will soon be converted to a test suite or forked. Currently to build the 
+artifact `mvn -D maven.test.skip=true` is required.
+
+Running
+-----
+
+IronCount runs with Kafka in the zookeeper enabled configuration. You should see the 
+Kafka documention if you need help with that part of the setup. IronCount uses ZooKeeper
+to store information on Workloads and coordinate who is running what.
+
+To bootstram IronCount only needs to know how to locate the ZooKeeper cluster.
+
+    bin/zookeeper-server-start.sh config/zookeeper.properties &
+    bin/kafka-server-start.sh config/server.properties &
+
+Start IronCount
+
+    java -cp ironcount-1.0.1-SNAPSHOT.jar com.jointhegrid.ironcount.ICLauncher &
+
+Use DeployTool to lauch a workload.
+ 
+    java -cp ironcount-1.0.1-SNAPSHOT.jar com.jointhegrid.ironcount.DeployTool deploy src/test/resources/workload.json
+
+The example workload writes all queue data to a local file. Open a tail session on the file.
+
+    $ tail -f /tmp/abc
+
+In another window use the Kafka producer shell to send messages that Kafka and IronCount process to finally be written to the file. They should appear in the file.
+
+   bin/kafka-producer-shell.sh --server kafka://localhost:9092 --topic topic1
+
+
+

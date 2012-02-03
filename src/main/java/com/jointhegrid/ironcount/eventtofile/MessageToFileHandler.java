@@ -71,7 +71,7 @@ public class MessageToFileHandler implements MessageHandler {
     }
   }
 
-    public static String getMessage(Message message) {
+  public static String getMessage(Message message) {
     ByteBuffer buffer = message.payload();
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);

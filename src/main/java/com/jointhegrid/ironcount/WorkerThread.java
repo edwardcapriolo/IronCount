@@ -63,7 +63,9 @@ public class WorkerThread implements Runnable, Watcher{
               m.getProps().getProperty(WorkloadManager.ZK_SERVER_LIST), 3000, this);
       wtId = UUID.randomUUID();
     } catch (IOException ex) {
+      logger.error(ex);
       throw new RuntimeException(ex);
+
     }
   }
 
@@ -83,8 +85,10 @@ public class WorkerThread implements Runnable, Watcher{
             logger.debug("Shutdown");
           }
         } catch (KeeperException ex) {
+          logger.error(ex);
           throw new RuntimeException (ex);
         } catch (InterruptedException ex) {
+          logger.error(ex);
           throw new RuntimeException (ex);
         }
       }
@@ -103,6 +107,7 @@ public class WorkerThread implements Runnable, Watcher{
     try {
       handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {
+      logger.error(ex);
       throw new RuntimeException(ex);
     }
 
@@ -114,8 +119,10 @@ public class WorkerThread implements Runnable, Watcher{
               new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
       zk.exists("/ironcount/workloads/"+ this.workload.name , this);
     } catch (KeeperException ex) {
+      logger.error(ex);
       throw new RuntimeException(ex);
     } catch (InterruptedException ex) {
+      logger.error(ex);
       throw new RuntimeException(ex);
     }
 
@@ -147,6 +154,7 @@ public class WorkerThread implements Runnable, Watcher{
       try {
         Thread.sleep(1);
       } catch (InterruptedException ex) {
+        logger.error(ex);
         throw new RuntimeException(ex);
       }
     }
@@ -158,6 +166,7 @@ public class WorkerThread implements Runnable, Watcher{
       executor.shutdown();
       logger.debug("thread tear down");
     } catch (InterruptedException ex) {
+      logger.warn(ex);
       throw new RuntimeException(ex);
     }
     status=WorkerThreadStatus.DONE;

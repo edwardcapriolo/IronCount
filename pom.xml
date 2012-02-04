@@ -26,12 +26,15 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- lock recipe taken vs cages
     <dependency>
           <groupId>org.scale7</groupId>
                   <artifactId>scale7-cages</artifactId>
                           <version>0.8-SNAPSHOT</version>
                           </dependency>
+      -->
     <dependency>
+  
 
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>

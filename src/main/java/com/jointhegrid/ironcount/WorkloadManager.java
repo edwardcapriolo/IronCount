@@ -35,12 +35,11 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+import org.apache.zookeeper.recipes.lock.WriteLock;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-import org.scale7.zookeeper.cages.ZkCagesException;
-import org.scale7.zookeeper.cages.ZkMultiPathLock;
-import org.scale7.zookeeper.cages.ZkSessionManager;
+
 
 /**
  * @author zznate
@@ -49,7 +48,7 @@ public class WorkloadManager implements Watcher {
 
   final static Logger logger = Logger.getLogger(WorkloadManager.class.getName());
   private ZooKeeper zk;
-  private ZkSessionManager session;
+  //private ZkSessionManager session;
 
   private ExecutorService executor;
   private int threadPoolSize = 4;
@@ -77,8 +76,8 @@ public class WorkloadManager implements Watcher {
     executor = Executors.newFixedThreadPool(threadPoolSize);
     try {
       zk = new ZooKeeper(props.getProperty( ZK_SERVER_LIST), 100, this);
-      session = new ZkSessionManager( props.getProperty(ZK_SERVER_LIST));
-      session.initializeInstance( props.getProperty(ZK_SERVER_LIST));
+    //  session = new ZkSessionManager( props.getProperty(ZK_SERVER_LIST));
+    //  session.initializeInstance( props.getProperty(ZK_SERVER_LIST));
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -193,10 +192,14 @@ public class WorkloadManager implements Watcher {
   public void considerStartingWorkload(Workload w){
     logger.debug("considert starting "+w);
     
-    ZkMultiPathLock lock = new ZkMultiPathLock();
-    lock.addWriteLock("/ironcount/workloads/"+w.name);
+    //ZkMultiPathLock lock = new ZkMultiPathLock();
+    //lock.addWriteLock("/ironcount/workloads/"+w.name);
+
+    WriteLock l = null;
     try {
-      lock.acquire();
+      //lock.acquire();
+      l = new WriteLock(zk, "/ironcount/workloads/" + w.name,null);
+      l.lock();
       List<String> children = zk.getChildren("/ironcount/workloads/" + w.name, false);
       if (children.size() <= w.maxWorkers){
         WorkerThread wt = new WorkerThread(this,w);
@@ -217,7 +220,8 @@ public class WorkloadManager implements Watcher {
       logger.error(t);
       throw new RuntimeException (t);
     } finally {
-      lock.release();
+      l.unlock();
+      //lock.release();
     }
   }
 

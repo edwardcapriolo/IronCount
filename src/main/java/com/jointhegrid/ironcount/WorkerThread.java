@@ -54,6 +54,7 @@ public class WorkerThread implements Runnable, Watcher{
 
   public WorkerThread(WorkloadManager m, Workload w) {
     status=WorkerThreadStatus.NEW;
+    wtId = UUID.randomUUID();
     workload=w;
     goOn=true;
     this.m=m;
@@ -61,7 +62,7 @@ public class WorkerThread implements Runnable, Watcher{
     try {
       zk = new ZooKeeper(
               m.getProps().getProperty(WorkloadManager.ZK_SERVER_LIST), 3000, this);
-      wtId = UUID.randomUUID();
+      
     } catch (IOException ex) {
       logger.error(ex);
       throw new RuntimeException(ex);
@@ -170,6 +171,14 @@ public class WorkerThread implements Runnable, Watcher{
       throw new RuntimeException(ex);
     }
     status=WorkerThreadStatus.DONE;
+  }
+
+  public UUID getWtId() {
+    return wtId;
+  }
+
+  public void setWtId(UUID wtId) {
+    this.wtId = wtId;
   }
 
 }

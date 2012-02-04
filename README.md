@@ -41,7 +41,7 @@ the changes to zookeeper and start instances of the Workload.
 Extending
 -----
 
-The first step is to implement the `MessageHandler` interface. Each worker instantates the handler
+The first step is to implement the `MessageHandler` interface. Each worker constructs the handler
 once. Then each kafka message is passed to the `handleMessage(Message m)` method. 
 
     package com.jointhegrid.ironcount.mockingbird;

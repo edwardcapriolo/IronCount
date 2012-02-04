@@ -31,13 +31,10 @@ public class MessageToFileHandler implements MessageHandler {
 
   final static Logger logger = Logger.getLogger(MessageToFileHandler.class.getName());
   FileWriter fw ;
+  WorkerThread parent;
   
   public MessageToFileHandler(){
-    try {
-      fw = new FileWriter(new File("/tmp/abc"));
-    } catch (IOException ex) {
-      logger.error(ex);
-    }
+
   }
 
   @Override
@@ -49,6 +46,7 @@ public class MessageToFileHandler implements MessageHandler {
   public void handleMessage(Message m) {
     String s = getMessage(m);
     try {
+      System.out.println(s);
       fw.write(s+"\n");
       fw.flush();
     } catch (IOException ex) {
@@ -58,7 +56,12 @@ public class MessageToFileHandler implements MessageHandler {
 
   @Override
   public void setWorkerThread(WorkerThread wt) {
-
+    parent=wt;
+    try {
+      fw = new FileWriter(new File("/tmp/ic_"+parent.getWtId()));
+    } catch (IOException ex) {
+      logger.error(ex);
+    }
   }
 
   @Override

@@ -206,10 +206,16 @@ public class WorkloadManager implements Watcher {
       }
     } catch (KeeperException ex) {
       throw new RuntimeException(ex);
-    } catch (ZkCagesException ex) {
+    }
+    /*catch (ZkCagesException ex) {
       throw new RuntimeException(ex);
-    } catch (InterruptedException ex) {
+    } */
+    catch (InterruptedException ex) {
       throw new RuntimeException(ex);
+    } catch (Throwable t){
+      t.printStackTrace(System.err);
+      logger.error(t);
+      throw new RuntimeException (t);
     } finally {
       lock.release();
     }

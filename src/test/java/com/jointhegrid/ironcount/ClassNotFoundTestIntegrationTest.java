@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.jointhegrid.ironcount;
 
 import java.util.HashMap;
@@ -10,14 +5,10 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- *
- * @author edward
- */
 public class ClassNotFoundTestIntegrationTest
         extends IronIntegrationTest {
 
-   @Test
+  @Test
   public void disableWorkload(){
     Workload w = new Workload();
     w.active = true;
@@ -34,7 +25,6 @@ public class ClassNotFoundTestIntegrationTest
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    //dl.startWorkload(w);
     m.startWorkload(w);
     try {
       Thread.sleep(2000);
@@ -42,7 +32,5 @@ public class ClassNotFoundTestIntegrationTest
     }
     Assert.assertEquals(0, m.getWorkerThreads().size() );
     m.shutdown();
-
-
   }
 }

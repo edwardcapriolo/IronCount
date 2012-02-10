@@ -145,6 +145,7 @@ public class WorkerThread implements Runnable, Watcher{
             } catch (Exception ex){
               logger.error("worker thread fired exception "+workload+" "+ex);
               goOn=false;
+              terminate();
             }
           }
         }

@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
@@ -48,8 +49,6 @@ public class WorkloadManager implements Watcher {
 
   final static Logger logger = Logger.getLogger(WorkloadManager.class.getName());
   private ZooKeeper zk;
-  //private ZkSessionManager session;
-
   private ExecutorService executor;
   private int threadPoolSize = 4;
   private AtomicBoolean active;
@@ -76,33 +75,46 @@ public class WorkloadManager implements Watcher {
     executor = Executors.newFixedThreadPool(threadPoolSize);
     try {
       zk = new ZooKeeper(props.getProperty( ZK_SERVER_LIST), 100, this);
-    //  session = new ZkSessionManager( props.getProperty(ZK_SERVER_LIST));
-    //  session.initializeInstance( props.getProperty(ZK_SERVER_LIST));
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
     try {
-      if (zk.exists("/ironcount", true) == null) {
-         zk.create("/ironcount", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
-      if (zk.exists("/ironcount/workers", false) == null) {
-         zk.create("/ironcount/workers", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
-      if (zk.exists("/ironcount/workloads", this) == null) {
-         zk.create( "/ironcount/workloads", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
+      createICHeir();
       zk.create("/ironcount/workers/"+myId.toString(), new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
       zk.exists("/ironcount/workloads", this);
-      
-      logger.info("Created /ironcount heirarchy");
-
-      List<String> children = zk.getChildren("/ironcount/workloads", false);
-      considerStarting(children);
+      new Thread(){
+        public void run(){
+          while (true){
+            try {
+              List<String> children = zk.getChildren("/ironcount/workloads", false);
+              considerStarting(children);
+              Thread.sleep(1000);
+            } catch (Exception ex){
+            }
+          }
+        }
+      }.start();
     } catch (KeeperException ex) {
       throw new RuntimeException(ex);
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  public void createICHeir() throws KeeperException, InterruptedException {
+
+      if (zk.exists("/ironcount", true) == null) {
+        logger.info("Creating /ironcount heirarchy");
+        zk.create("/ironcount", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+      }
+      if (zk.exists("/ironcount/workers", false) == null) {
+        zk.create("/ironcount/workers", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+      }
+      if (zk.exists("/ironcount/workloads", this) == null) {
+        zk.create("/ironcount/workloads", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+      }
+
+
   }
 
   public void shutdown() {

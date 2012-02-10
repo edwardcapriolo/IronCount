@@ -191,13 +191,8 @@ public class WorkloadManager implements Watcher {
 
   public void considerStartingWorkload(Workload w){
     logger.debug("considert starting "+w);
-    
-    //ZkMultiPathLock lock = new ZkMultiPathLock();
-    //lock.addWriteLock("/ironcount/workloads/"+w.name);
-
     WriteLock l = null;
     try {
-      //lock.acquire();
       l = new WriteLock(zk, "/ironcount/workloads/" + w.name,null);
       l.lock();
       List<String> children = zk.getChildren("/ironcount/workloads/" + w.name, false);
@@ -210,9 +205,6 @@ public class WorkloadManager implements Watcher {
     } catch (KeeperException ex) {
       throw new RuntimeException(ex);
     }
-    /*catch (ZkCagesException ex) {
-      throw new RuntimeException(ex);
-    } */
     catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     } catch (Throwable t){

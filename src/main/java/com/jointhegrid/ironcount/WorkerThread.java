@@ -109,7 +109,7 @@ public class WorkerThread implements Runnable, Watcher{
       handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {
       logger.error(ex);
-      throw new RuntimeException(ex);
+      this.terminate();
     }
 
     handler.setWorkload(this.workload);
@@ -121,10 +121,10 @@ public class WorkerThread implements Runnable, Watcher{
       zk.exists("/ironcount/workloads/"+ this.workload.name , this);
     } catch (KeeperException ex) {
       logger.error(ex);
-      throw new RuntimeException(ex);
+      this.terminate();
     } catch (InterruptedException ex) {
       logger.error(ex);
-      throw new RuntimeException(ex);
+      this.terminate();
     }
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
@@ -156,23 +156,30 @@ public class WorkerThread implements Runnable, Watcher{
         Thread.sleep(1);
       } catch (InterruptedException ex) {
         logger.error(ex);
-        throw new RuntimeException(ex);
+        this.terminate();
       }
     }
 
     logger.debug("thread end");
+    terminate();
+    
+  }
+
+  public void terminate(){
     try {
       this.m.getWorkerThreads().remove(this);
       this.zk.close();
       executor.shutdown();
       logger.debug("thread tear down");
+      status=WorkerThreadStatus.DONE;
+      if (consumerConnector !=null){
+        consumerConnector.shutdown();
+      }
     } catch (InterruptedException ex) {
       logger.warn(ex);
-      throw new RuntimeException(ex);
     }
-    status=WorkerThreadStatus.DONE;
   }
-
+  
   public UUID getWtId() {
     return wtId;
   }

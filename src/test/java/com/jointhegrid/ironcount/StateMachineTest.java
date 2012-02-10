@@ -44,16 +44,19 @@ public class StateMachineTest extends IronIntegrationTest {
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    m.startWorkload(w);
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException ex) {
-    }
-    Assert.assertEquals(1, m.getWorkerThreads().size());
-
     producer.send(new ProducerData<Integer, String>(topic, "1"));
     producer.send(new ProducerData<Integer, String>(topic, "2"));
     producer.send(new ProducerData<Integer, String>(topic, "3"));
+
+    m.startWorkload(w);
+    try {
+      Thread.sleep(6000);
+    } catch (InterruptedException ex) {
+    }
+
+    Assert.assertEquals(1, m.getWorkerThreads().size());
+    Assert.assertEquals(3,sh.messageCount.get());
+
 
     w.active = false;
     m.stopWorkload(w);
@@ -62,12 +65,20 @@ public class StateMachineTest extends IronIntegrationTest {
       Thread.sleep(1000);
     } catch (InterruptedException ex) {
     }
+    Assert.assertEquals(0, m.getWorkerThreads().size());
+
+    m.deleteWorkload(w);
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException ex) {
+    }
+
 
     producer.send(new ProducerData<Integer, String>(topic, "4"));
     producer.send(new ProducerData<Integer, String>(topic, "5"));
     producer.send(new ProducerData<Integer, String>(topic, "6"));
 
-    m.deleteWorkload(w);
+   
 
     try {
       Thread.sleep(1000);

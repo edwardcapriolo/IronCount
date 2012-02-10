@@ -36,7 +36,7 @@ public class SimpleMessageHandler implements MessageHandler{
   @Override
   public void handleMessage(Message m) {
     messageCount.addAndGet(1);
-    System.out.println(myId+" "+ IronIntegrationTest.getMessage(m));
+    System.out.println("handlerId:"+ myId+" message:"+ IronIntegrationTest.getMessage(m));
   }
 
   @Override

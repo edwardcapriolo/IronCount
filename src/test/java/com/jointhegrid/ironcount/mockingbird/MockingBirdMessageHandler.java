@@ -103,4 +103,9 @@ public class MockingBirdMessageHandler implements MessageHandler {
   @Override
   public void setWorkerThread(WorkerThread wt) {
   }
+
+  @Override
+  public void stop() {
+  }
+
 }

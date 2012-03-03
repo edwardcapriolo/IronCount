@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 
 public class MessageToFileHandler implements MessageHandler {
 
+
   final static Logger logger = Logger.getLogger(MessageToFileHandler.class.getName());
   FileWriter fw ;
   WorkerThread parent;
@@ -65,13 +66,18 @@ public class MessageToFileHandler implements MessageHandler {
   }
 
   @Override
-  public void finalize () throws Throwable{
-    super.finalize();
+  public void stop() {
     try {
       fw.close();
     } catch (IOException ex) {
       logger.error(ex);
     }
+  }
+
+  @Override
+  public void finalize () throws Throwable{
+    super.finalize();
+    this.stop();
   }
 
   public static String getMessage(Message message) {

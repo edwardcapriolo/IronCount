@@ -3,30 +3,31 @@ package com.jointhegrid.ironcount.caligraphy;
 import com.jointhegrid.ironcount.MessageHandler;
 import com.jointhegrid.ironcount.WorkerThread;
 import com.jointhegrid.ironcount.Workload;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import kafka.message.Message;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public class CaligraphyMessageHandler implements MessageHandler {
 
   private Workload w;
   private WorkerThread wt;
-  private Map<Date,DataCollector> outs;
+  private Map<String,Writer> outs;
   FileSystem fs;
-  DateFormat df;
 
   public CaligraphyMessageHandler(){
-    outs=new HashMap<Date,DataCollector>();
+    outs=new HashMap<String,Writer>();
   }
 
   @Override
@@ -37,26 +38,31 @@ public class CaligraphyMessageHandler implements MessageHandler {
   @Override
   public void handleMessage(Message m) {
     //field1 YYYY_MM_DD_HH_MM;
-    String [] parts = getMessage(m).split("\\|");
-    df = new SimpleDateFormat("yyyy-MM-dd");
-    Date d = null;
-    try {
-      d = df.parse(parts[0]);
-      write(d, parts);
-    } catch (ParseException ex) {
-      Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
-    }
-  }
-
-  public void write(Date date, String [] parts){
-    if ( outs.get(date) == null){
-      outs.put(date, new DataCollector(this));
+    String s = getMessage(m);
+    String key = s.substring(0,s.indexOf("|"));
+    String rest = s.substring(s.indexOf("|")+1);
+    if ( this.outs.containsKey(key) ){
+      try {
+        this.outs.get(key).write(rest+"\n");
+        System.out.println(rest);
+      } catch (IOException ex) {
+        Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
+      }
     } else {
-      DataCollector dc = outs.get(date);
-      dc.write(date, parts);
+      try {
+        BufferedWriter bw = new BufferedWriter( new OutputStreamWriter
+                (fs.create(new Path("/tmp/events", key) )));
+        this.outs.put(key, bw);
+        this.outs.get(key).write(rest+"\n");
+        System.out.println(rest);
+      } catch (IOException ex) {
+        Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
+
   }
 
+  
   @Override
   public void setWorkerThread(WorkerThread wt) {
     this.wt=wt;
@@ -78,5 +84,21 @@ public class CaligraphyMessageHandler implements MessageHandler {
     buffer.get(bytes);
     return new String(bytes);
   }
+
+  @Override
+  public void stop() {
+    for (Map.Entry<String,Writer> entry:
+      this.outs.entrySet() ){
+      if (entry.getValue()!=null){
+        try {
+          entry.getValue().flush();
+          entry.getValue().close();
+        } catch (IOException ex) {
+          System.err.println(ex);
+        }
+      }
+    }
+  }
+  
 }
 

@@ -82,4 +82,10 @@ public class MapHandler implements MessageHandler {
     buffer.get(bytes);
     return new String(bytes);
   }
+
+  @Override
+  public void stop() {
+  }
+
+
 }

@@ -170,6 +170,7 @@ public class WorkerThread implements Runnable, Watcher{
     try {
       this.m.getWorkerThreads().remove(this);
       this.zk.close();
+      this.handler.stop();
       executor.shutdown();
       logger.debug("thread tear down");
       status=WorkerThreadStatus.DONE;

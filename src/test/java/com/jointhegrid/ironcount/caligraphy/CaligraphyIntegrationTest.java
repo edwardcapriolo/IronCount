@@ -1,14 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.jointhegrid.ironcount.caligraphy;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
 import com.jointhegrid.ironcount.StringSerializer;
 import com.jointhegrid.ironcount.Workload;
 import com.jointhegrid.ironcount.WorkloadManager;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +21,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.QueryResult;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -30,7 +31,7 @@ import org.junit.Test;
 public class CaligraphyIntegrationTest extends IronIntegrationTest {
 
    @Test
-  public void mockingBirdDemo() {
+  public void mockingBirdDemo() throws FileNotFoundException, IOException {
 
 
     Workload w = new Workload();
@@ -57,8 +58,8 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
     m.startWorkload(w);
 
     producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.34"));
-    producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.34"));
-    producer.send(new ProducerData<Integer, String>(topic, "2012-01-02|/index.htm|34.34.34.34"));
+    producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.35"));
+    producer.send(new ProducerData<Integer, String>(topic, "2012-01-02|/index.htm|34.34.34.36"));
 
     try {
       Thread.sleep(10000);
@@ -66,8 +67,24 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
+    w.active=false;
+    m.stopWorkload(w);
+     try {
+      Thread.sleep(2000);
+    } catch (InterruptedException ex) {
+      Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
+    }
 
+    //m.deleteWorkload(w);
     m.shutdown();
+
+    FileReader fr = new FileReader("/tmp/events/2012-01-01");
+    BufferedReader br = new BufferedReader(fr);
+    String line1 = br.readLine();
+    String line2 = br.readLine();
+    br.close();
+    Assert.assertEquals("/index.htm|34.34.34.34", line1);
+    Assert.assertEquals("/index.htm|34.34.34.35", line2);
   }
 
 }

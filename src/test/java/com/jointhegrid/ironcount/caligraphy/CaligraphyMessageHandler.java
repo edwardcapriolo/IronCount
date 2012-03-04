@@ -37,14 +37,12 @@ public class CaligraphyMessageHandler implements MessageHandler {
 
   @Override
   public void handleMessage(Message m) {
-    //field1 YYYY_MM_DD_HH_MM;
     String s = getMessage(m);
     String key = s.substring(0,s.indexOf("|"));
     String rest = s.substring(s.indexOf("|")+1);
     if ( this.outs.containsKey(key) ){
       try {
         this.outs.get(key).write(rest+"\n");
-        System.out.println(rest);
       } catch (IOException ex) {
         Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -54,7 +52,6 @@ public class CaligraphyMessageHandler implements MessageHandler {
                 (fs.create(new Path("/tmp/events", key) )));
         this.outs.put(key, bw);
         this.outs.get(key).write(rest+"\n");
-        System.out.println(rest);
       } catch (IOException ex) {
         Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -93,9 +90,7 @@ public class CaligraphyMessageHandler implements MessageHandler {
         try {
           entry.getValue().flush();
           entry.getValue().close();
-        } catch (IOException ex) {
-          System.err.println(ex);
-        }
+        } catch (IOException ex) { }
       }
     }
   }

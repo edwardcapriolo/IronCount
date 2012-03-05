@@ -54,6 +54,7 @@ public class WorkloadManager implements Watcher {
   private AtomicBoolean active;
   private UUID myId;//get this from properties
   private Properties props;
+  private long rescanMillis=2000;
 
   private Map<WorkerThread,Object> workerThreads;
 
@@ -164,8 +165,9 @@ public class WorkloadManager implements Watcher {
     String name = parts[3];
     for (WorkerThread wt : this.workerThreads.keySet()){
       if (wt.workload.name.equals(name)){
-        wt.executor.shutdown();
+        //wt.executor.shutdown();
         wt.goOn=false;
+        wt.terminate();
       }
     }
   }
@@ -225,7 +227,6 @@ public class WorkloadManager implements Watcher {
       throw new RuntimeException (t);
     } finally {
       l.unlock();
-      //lock.release();
     }
   }
 
@@ -311,7 +312,7 @@ public class WorkloadManager implements Watcher {
         children = zk.getChildren("/ironcount/workloads/" + w.name, false);
       }
       Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
-      Thread.sleep(2000);
+      Thread.sleep(this.rescanMillis);
       zk.delete("/ironcount/workloads/" + w.name, s.getVersion());
     } catch (InterruptedException ex) {
         throw new RuntimeException(ex);

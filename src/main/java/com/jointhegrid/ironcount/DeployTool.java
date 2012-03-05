@@ -37,6 +37,8 @@ public class DeployTool {
       logger.warn(WorkloadManager.ZK_SERVER_LIST+" was not defined setting to localhost:2181");
       properties.setProperty(WorkloadManager.ZK_SERVER_LIST, "localhost:2181");
     }
+    //This should prevent te manager from picking up jobs
+    properties.setProperty(WorkloadManager.IC_THREAD_POOL_SIZE, "0");
 
     workloadManager = new WorkloadManager(properties);
     workloadManager.init();

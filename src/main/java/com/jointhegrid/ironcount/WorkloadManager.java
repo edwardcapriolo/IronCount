@@ -103,19 +103,16 @@ public class WorkloadManager implements Watcher {
   }
 
   public void createICHeir() throws KeeperException, InterruptedException {
-
-      if (zk.exists("/ironcount", true) == null) {
-        logger.info("Creating /ironcount heirarchy");
-        zk.create("/ironcount", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
-      if (zk.exists("/ironcount/workers", false) == null) {
-        zk.create("/ironcount/workers", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
-      if (zk.exists("/ironcount/workloads", this) == null) {
-        zk.create("/ironcount/workloads", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-      }
-
-
+    if (zk.exists("/ironcount", true) == null) {
+      logger.info("Creating /ironcount heirarchy");
+      zk.create("/ironcount", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    }
+    if (zk.exists("/ironcount/workers", false) == null) {
+      zk.create("/ironcount/workers", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    }
+    if (zk.exists("/ironcount/workloads", this) == null) {
+      zk.create("/ironcount/workloads", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    }
   }
 
   public void shutdown() {

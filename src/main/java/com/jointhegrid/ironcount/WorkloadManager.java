@@ -89,7 +89,7 @@ public class WorkloadManager implements Watcher {
             try {
               List<String> children = zk.getChildren("/ironcount/workloads", false);
               considerStarting(children);
-              Thread.sleep(1000);
+              Thread.sleep(rescanMillis);
             } catch (Exception ex){
             }
           }
@@ -312,7 +312,7 @@ public class WorkloadManager implements Watcher {
         children = zk.getChildren("/ironcount/workloads/" + w.name, false);
       }
       Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
-      Thread.sleep(this.rescanMillis);
+      Thread.sleep(1000);
       zk.delete("/ironcount/workloads/" + w.name, s.getVersion());
     } catch (InterruptedException ex) {
         throw new RuntimeException(ex);

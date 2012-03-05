@@ -27,7 +27,7 @@ public class ICLauncher {
   public static void main(String[] args) {
     properties = System.getProperties();
     if (properties.get(WorkloadManager.ZK_SERVER_LIST) == null) {
-      logger.warn(WorkloadManager.ZK_SERVER_LIST+" was not defined setting to localhost:2181");
+      logger.warn(WorkloadManager.ZK_SERVER_LIST+" was not defined. Defaulting to localhost:2181");
       properties.setProperty(WorkloadManager.ZK_SERVER_LIST, "localhost:2181");
     }
 

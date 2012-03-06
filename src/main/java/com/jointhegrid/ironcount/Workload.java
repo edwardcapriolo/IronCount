@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount;
 
+import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 public class Workload {
@@ -27,6 +29,7 @@ public class Workload {
   public Integer maxWorkers;
   public Map<String, String> properties;
   public Boolean active;//want to use this
+  public List<URL> classloaderUrls;
 
   public Workload() {
   }

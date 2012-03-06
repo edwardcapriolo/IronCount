@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount;
 
+import com.jointhegrid.ironcount.classloader.ICURLClassLoader;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -106,7 +107,8 @@ public class WorkerThread implements Runnable, Watcher{
     consumerConnector = Consumer.createJavaConsumerConnector(config);
     
     try {
-      handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
+      //handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
+      handler = (MessageHandler) new ICURLClassLoader().getClassLoader(workload).loadClass(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {
       logger.error(ex);
       this.terminate();

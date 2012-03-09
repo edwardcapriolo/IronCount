@@ -17,8 +17,6 @@ package com.jointhegrid.ironcount;
 
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import kafka.javaapi.producer.ProducerData;
 import org.junit.Assert;
 import org.junit.Test;

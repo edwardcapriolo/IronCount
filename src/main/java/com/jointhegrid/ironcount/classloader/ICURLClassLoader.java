@@ -9,7 +9,6 @@ public class ICURLClassLoader {
           throws MalformedURLException, ClassNotFoundException,
           InstantiationException, IllegalAccessException {
     java.net.URLClassLoader loader = null;
-
     if (w.classloaderUrls!=null){
       if (w.classloaderUrls.size()>0){
         loader = new java.net.URLClassLoader(

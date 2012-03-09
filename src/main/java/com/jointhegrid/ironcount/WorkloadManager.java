@@ -91,6 +91,7 @@ public class WorkloadManager implements Watcher {
               considerStarting(children);
               Thread.sleep(rescanMillis);
             } catch (Exception ex){
+              logger.error("Exception during scan "+ex);
             }
           }
         }
@@ -117,6 +118,10 @@ public class WorkloadManager implements Watcher {
 
   public void shutdown() {
     active.set(false);
+    for (WorkerThread wt : this.workerThreads.keySet()){
+      wt.goOn=false;
+      wt.terminate();
+    }
     executor.shutdown();
   }
 
@@ -202,6 +207,10 @@ public class WorkloadManager implements Watcher {
 
   public void considerStartingWorkload(Workload w){
     logger.debug("considert starting "+w);
+    if (w.active==false){
+      logger.debug(w.name + " is non active");
+      return;
+    }
     WriteLock l = null;
     try {
       l = new WriteLock(zk, "/ironcount/workloads/" + w.name,null);

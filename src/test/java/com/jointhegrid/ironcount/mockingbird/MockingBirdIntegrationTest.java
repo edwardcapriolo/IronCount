@@ -20,8 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
-import com.jointhegrid.ironcount.WorkloadManager;
-import com.jointhegrid.ironcount.Workload;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
+import com.jointhegrid.ironcount.manager.Workload;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;

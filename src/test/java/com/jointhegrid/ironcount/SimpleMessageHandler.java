@@ -15,6 +15,9 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount;
 
+import com.jointhegrid.ironcount.manager.Workload;
+import com.jointhegrid.ironcount.manager.MessageHandler;
+import com.jointhegrid.ironcount.manager.WorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import kafka.message.Message;
 

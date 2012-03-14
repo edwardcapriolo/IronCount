@@ -15,9 +15,9 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount.eventtofile;
 
-import com.jointhegrid.ironcount.MessageHandler;
-import com.jointhegrid.ironcount.WorkerThread;
-import com.jointhegrid.ironcount.Workload;
+import com.jointhegrid.ironcount.manager.MessageHandler;
+import com.jointhegrid.ironcount.manager.WorkerThread;
+import com.jointhegrid.ironcount.manager.Workload;
 
 import java.io.File;
 import java.io.FileWriter;

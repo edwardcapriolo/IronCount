@@ -1,9 +1,9 @@
 package com.jointhegrid.ironcount.caligraphy;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
-import com.jointhegrid.ironcount.StringSerializer;
-import com.jointhegrid.ironcount.Workload;
-import com.jointhegrid.ironcount.WorkloadManager;
+import com.jointhegrid.ironcount.manager.StringSerializer;
+import com.jointhegrid.ironcount.manager.Workload;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

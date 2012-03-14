@@ -15,8 +15,8 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount.user;
 
-import com.jointhegrid.ironcount.Workload;
-import com.jointhegrid.ironcount.WorkloadManager;
+import com.jointhegrid.ironcount.manager.Workload;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

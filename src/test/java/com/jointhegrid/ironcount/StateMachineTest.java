@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount;
 
+import com.jointhegrid.ironcount.manager.Workload;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
 import kafka.javaapi.producer.ProducerData;

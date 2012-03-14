@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount.user;
 
-import com.jointhegrid.ironcount.WorkloadManager;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 

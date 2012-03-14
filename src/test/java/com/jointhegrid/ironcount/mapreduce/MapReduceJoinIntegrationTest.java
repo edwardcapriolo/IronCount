@@ -16,8 +16,8 @@ limitations under the License.
 package com.jointhegrid.ironcount.mapreduce;
 
 import com.jointhegrid.ironcount.IronIntegrationTest;
-import com.jointhegrid.ironcount.Workload;
-import com.jointhegrid.ironcount.WorkloadManager;
+import com.jointhegrid.ironcount.manager.Workload;
+import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;

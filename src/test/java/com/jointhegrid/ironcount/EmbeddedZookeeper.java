@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount;
 
+import com.jointhegrid.ironcount.manager.StringSerializer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

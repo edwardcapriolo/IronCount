@@ -1,6 +1,6 @@
 package com.jointhegrid.ironcount.classloader;
 
-import com.jointhegrid.ironcount.Workload;
+import com.jointhegrid.ironcount.manager.Workload;
 import java.net.MalformedURLException;
 import java.net.URL;
 

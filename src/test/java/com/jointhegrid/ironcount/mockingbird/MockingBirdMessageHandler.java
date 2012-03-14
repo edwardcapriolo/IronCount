@@ -15,9 +15,9 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount.mockingbird;
 
-import com.jointhegrid.ironcount.MessageHandler;
-import com.jointhegrid.ironcount.WorkerThread;
-import com.jointhegrid.ironcount.Workload;
+import com.jointhegrid.ironcount.manager.MessageHandler;
+import com.jointhegrid.ironcount.manager.WorkerThread;
+import com.jointhegrid.ironcount.manager.Workload;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;

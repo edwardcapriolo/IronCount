@@ -15,9 +15,9 @@ limitations under the License.
 */
 package com.jointhegrid.ironcount.mapreduce;
 
-import com.jointhegrid.ironcount.MessageHandler;
-import com.jointhegrid.ironcount.WorkerThread;
-import com.jointhegrid.ironcount.Workload;
+import com.jointhegrid.ironcount.manager.MessageHandler;
+import com.jointhegrid.ironcount.manager.WorkerThread;
+import com.jointhegrid.ironcount.manager.Workload;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Properties;

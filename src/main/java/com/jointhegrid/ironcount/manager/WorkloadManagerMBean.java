@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.jointhegrid.ironcount;
+package com.jointhegrid.ironcount.manager;
 
 /**
  *

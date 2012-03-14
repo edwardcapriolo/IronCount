@@ -80,7 +80,7 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     }
     MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     try {
-      mbs.registerMBean(this, new ObjectName(MBEAN_OBJECT_NAME+",uid="+myId));
+      mbs.registerMBean(this, new ObjectName(MBEAN_OBJECT_NAME+",uuid="+myId));
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }

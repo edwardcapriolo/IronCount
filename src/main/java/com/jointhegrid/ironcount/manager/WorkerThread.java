@@ -36,7 +36,7 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
-public class WorkerThread implements Runnable, Watcher{
+public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
   final static Logger logger = Logger.getLogger(WorkerThread.class.getName());
   
@@ -163,7 +163,7 @@ public class WorkerThread implements Runnable, Watcher{
       }
     }
 
-    logger.debug("thread end");
+    logger.debug("WorkerThread end");
     terminate();
     
   }
@@ -174,7 +174,7 @@ public class WorkerThread implements Runnable, Watcher{
       this.zk.close();
       this.handler.stop();
       executor.shutdown();
-      logger.debug("thread tear down");
+      logger.debug("WorkerThread tear down");
       status=WorkerThreadStatus.DONE;
       if (consumerConnector !=null){
         consumerConnector.shutdown();
@@ -192,4 +192,9 @@ public class WorkerThread implements Runnable, Watcher{
     this.wtId = wtId;
   }
 
+  @Override
+  public String getJSONSerializedWorkload() {
+    byte [] b = m.serializeWorkload(this.workload);
+    return new String(b);
+  }
 }

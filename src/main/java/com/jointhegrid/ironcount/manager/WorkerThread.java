@@ -17,9 +17,12 @@ package com.jointhegrid.ironcount.manager;
 
 import com.jointhegrid.ironcount.classloader.ICURLClassLoader;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -39,6 +42,7 @@ import org.apache.zookeeper.data.Stat;
 public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
   final static Logger logger = Logger.getLogger(WorkerThread.class.getName());
+  public static final String MBEAN_OBJECT_NAME = "com.jointhegrid.ironcount:type=WorkerThread";
   
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
@@ -63,11 +67,16 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     try {
       zk = new ZooKeeper(
               m.getProps().getProperty(WorkloadManager.ZK_SERVER_LIST), 3000, this);
-      
     } catch (IOException ex) {
       logger.error(ex);
       throw new RuntimeException(ex);
+    }
 
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    try {
+      mbs.registerMBean(this, new ObjectName(MBEAN_OBJECT_NAME+",uuid="+wtId));
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
     }
   }
 

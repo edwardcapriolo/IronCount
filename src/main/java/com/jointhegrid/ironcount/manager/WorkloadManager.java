@@ -282,6 +282,12 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     this.myId = myId;
   }
 
+  @Override
+  public void applyWorkload(String workload){
+    Workload w = this.deserializeWorkload(workload.getBytes());
+    startWorkload(w);
+  }
+
   public void startWorkload(Workload w){
     try {
       zk.create("/ironcount/workloads/" + w.name, this.serializeWorkload(w),

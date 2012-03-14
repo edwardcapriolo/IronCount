@@ -15,4 +15,6 @@ public interface WorkloadManagerMBean {
 
   public void setThreadPoolSize(int size);
   public int getThreadPoolSize();
+
+  public void applyWorkload(String workloadAsJson);
 }

@@ -13,8 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.jointhegrid.ironcount;
+package com.jointhegrid.ironcount.user;
 
+import com.jointhegrid.ironcount.Workload;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;

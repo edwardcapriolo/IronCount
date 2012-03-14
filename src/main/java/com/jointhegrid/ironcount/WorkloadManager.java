@@ -17,6 +17,7 @@ package com.jointhegrid.ironcount;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,12 @@ import java.util.WeakHashMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
@@ -45,7 +52,9 @@ import org.codehaus.jackson.type.JavaType;
 /**
  * @author zznate
  */
-public class WorkloadManager implements Watcher {
+public class WorkloadManager implements Watcher,WorkloadManagerMBean {
+
+  public static final String MBEAN_OBJECT_NAME = "com.jointhegrid.ironcount:type=WorkloadManager";
 
   final static Logger logger = Logger.getLogger(WorkloadManager.class.getName());
   private ZooKeeper zk;
@@ -68,6 +77,12 @@ public class WorkloadManager implements Watcher {
     workerThreads = new HashMap<WorkerThread,Object>();
     if (p.contains(IC_THREAD_POOL_SIZE)){
       this.threadPoolSize = Integer.parseInt(IC_THREAD_POOL_SIZE);
+    }
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    try {
+      mbs.registerMBean(this, new ObjectName(MBEAN_OBJECT_NAME+",uid="+myId));
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
     }
   }
 
@@ -342,5 +357,26 @@ public class WorkloadManager implements Watcher {
   public void setWorkerThreads(WeakHashMap<WorkerThread, Object> workerThreads) {
     this.workerThreads = workerThreads;
   }
- 
+
+  @Override
+  public void setRescanMillis(long millis) {
+    this.rescanMillis=millis;
+  }
+
+  @Override
+  public long getRescanMillis() {
+    return rescanMillis;
+  }
+
+  @Override
+  public void setThreadPoolSize(int size) {
+    this.threadPoolSize=size;
+  }
+
+  @Override
+  public int getThreadPoolSize() {
+    return threadPoolSize;
+  }
+
+
 }

@@ -84,7 +84,7 @@ public class DeployTool {
       System.out.println(ex);
     }
     if (work!=null){
-       workloadManager.startWorkload(work);
+       workloadManager.applyWorkload(work);
     }
   }
 }

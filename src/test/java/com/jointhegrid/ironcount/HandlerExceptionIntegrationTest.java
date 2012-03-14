@@ -38,7 +38,7 @@ public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
 
 
 
-    m.startWorkload(w);
+    m.applyWorkload(w);
 
     try {
       Thread.sleep(8000);

@@ -44,7 +44,7 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     m.init();
 
     //dl.startWorkload(w);
-    m.startWorkload(w);
+    m.applyWorkload(w);
     try {
       Thread.sleep(3000);
     } catch (InterruptedException ex) {
@@ -61,7 +61,7 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     }
 
     w.active=false;
-    m.stopWorkload(w);
+    m.applyWorkload(w);
 
      try {
       Thread.sleep(3000);

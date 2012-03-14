@@ -80,7 +80,7 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    m.startWorkload(w);
+    m.applyWorkload(w);
     
     producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/stuff"));
     producer.send(new ProducerData<Integer, String>(topic, "http://toys.ed.com/toys"));

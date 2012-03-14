@@ -282,12 +282,29 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     this.myId = myId;
   }
 
+  public void applyWorkload(Workload w){
+    try {
+      Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
+      if (s!=null){
+        zk.setData("/ironcount/workloads/" + w.name, this.serializeWorkload(w), s.getVersion());
+      } else {
+        zk.create("/ironcount/workloads/" + w.name, this.serializeWorkload(w),
+              Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+      }
+    } catch (KeeperException ex) {
+      throw new RuntimeException(ex);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
   @Override
   public void applyWorkload(String workload){
     Workload w = this.deserializeWorkload(workload.getBytes());
-    startWorkload(w);
+    applyWorkload(w);
   }
 
+  /*
   public void startWorkload(Workload w){
     try {
       zk.create("/ironcount/workloads/" + w.name, this.serializeWorkload(w),
@@ -298,8 +315,9 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
       throw new RuntimeException(ex);
     }
   }
+  */
 
-
+  /*
   public void stopWorkload(Workload w){
     try {
       Stat s = zk.exists("/ironcount/workloads/" + w.name, false);
@@ -310,6 +328,8 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
       throw new RuntimeException(ex);
     }
   }
+   * 
+   */
 
   public List<Workload> getAllWorkloads() {
     List<Workload> all = new ArrayList<Workload>();

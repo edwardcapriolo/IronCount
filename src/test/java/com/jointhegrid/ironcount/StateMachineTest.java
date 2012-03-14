@@ -48,7 +48,7 @@ public class StateMachineTest extends IronIntegrationTest {
     producer.send(new ProducerData<Integer, String>(topic, "2"));
     producer.send(new ProducerData<Integer, String>(topic, "3"));
 
-    m.startWorkload(w);
+    m.applyWorkload(w);
     try {
       Thread.sleep(6000);
     } catch (InterruptedException ex) {
@@ -59,7 +59,7 @@ public class StateMachineTest extends IronIntegrationTest {
 
 
     w.active = false;
-    m.stopWorkload(w);
+    m.applyWorkload(w);
 
     try {
       Thread.sleep(3000);
@@ -86,7 +86,7 @@ public class StateMachineTest extends IronIntegrationTest {
     Assert.assertEquals(0, m.getWorkerThreads().size());
 
     w.active=true;
-    m.startWorkload(w);
+    m.applyWorkload(w);
 
     producer.send(new ProducerData<Integer, String>(topic, "7"));
     producer.send(new ProducerData<Integer, String>(topic, "8"));

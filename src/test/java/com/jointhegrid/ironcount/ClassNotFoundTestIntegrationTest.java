@@ -27,7 +27,7 @@ public class ClassNotFoundTestIntegrationTest
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    m.startWorkload(w);
+    m.applyWorkload(w);
     try {
       Thread.sleep(2000);
     } catch (InterruptedException ex) {

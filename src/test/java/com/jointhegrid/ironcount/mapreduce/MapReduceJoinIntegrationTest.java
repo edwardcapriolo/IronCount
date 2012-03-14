@@ -94,8 +94,8 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    m.startWorkload(mapper);
-    m.startWorkload(reducer);
+    m.applyWorkload(mapper);
+    m.applyWorkload(reducer);
 
     try {
       Thread.sleep(5000);

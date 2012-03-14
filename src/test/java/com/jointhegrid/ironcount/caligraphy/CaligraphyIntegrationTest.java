@@ -55,7 +55,7 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    m.startWorkload(w);
+    m.applyWorkload(w);
 
     producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.34"));
     producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.35"));
@@ -68,7 +68,7 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
     }
 
     w.active=false;
-    m.stopWorkload(w);
+    m.applyWorkload(w);
      try {
       Thread.sleep(2000);
     } catch (InterruptedException ex) {

@@ -21,6 +21,8 @@ import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -43,7 +45,8 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
   final static Logger logger = Logger.getLogger(WorkerThread.class.getName());
   public static final String MBEAN_OBJECT_NAME = "com.jointhegrid.ironcount:type=WorkerThread";
-  
+
+  private final AtomicLong messagesProcessesed ;
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
   Workload workload;
@@ -58,6 +61,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
   ExecutorService executor;
 
   public WorkerThread(WorkloadManager m, Workload w) {
+    messagesProcessesed = new AtomicLong(0);
     status=WorkerThreadStatus.NEW;
     wtId = UUID.randomUUID();
     workload=w;
@@ -152,6 +156,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
             try {
               if (goOn){
                 handler.handleMessage(message);
+                messagesProcessesed.addAndGet(1);
               }
             } catch (Exception ex){
               logger.error("worker thread fired exception "+workload+" "+ex);
@@ -177,8 +182,10 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     
   }
 
+  @Override
   public void terminate(){
     try {
+      this.goOn=false;
       this.m.getWorkerThreads().remove(this);
       this.zk.close();
       this.handler.stop();
@@ -188,6 +195,13 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
       if (consumerConnector !=null){
         consumerConnector.shutdown();
       }
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    try {
+      mbs.unregisterMBean(new ObjectName(MBEAN_OBJECT_NAME+",uuid="+wtId));
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+   
     } catch (InterruptedException ex) {
       logger.warn(ex);
     }
@@ -206,4 +220,17 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     byte [] b = m.serializeWorkload(this.workload);
     return new String(b);
   }
+
+  @Override
+  public long getMessagesProcessesed() {
+    return messagesProcessesed.get();
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    super.finalize();
+   
+  }
+
+
 }

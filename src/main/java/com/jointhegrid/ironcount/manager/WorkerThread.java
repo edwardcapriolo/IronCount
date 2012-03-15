@@ -46,6 +46,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
   public static final String MBEAN_OBJECT_NAME = "com.jointhegrid.ironcount:type=WorkerThread";
 
   private final AtomicLong messagesProcessesed ;
+  private final AtomicLong processingTime;
   enum WorkerThreadStatus { NEW,INIT,RUNNING,DONE };
   WorkerThreadStatus status;
   Workload workload;
@@ -61,6 +62,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
   public WorkerThread(WorkloadManager m, Workload w) {
     messagesProcessesed = new AtomicLong(0);
+    processingTime = new AtomicLong(0);
     status=WorkerThreadStatus.NEW;
     wtId = UUID.randomUUID();
     workload=w;
@@ -154,9 +156,11 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
           for(Message message: stream) {
             try {
               if (goOn){
+                long before=System.nanoTime();
                 handler.handleMessage(message);
+                long after=System.nanoTime();
+                processingTime.addAndGet(after-before);
                 messagesProcessesed.addAndGet(1);
-
               }
             } catch (Exception ex){
               logger.error("worker thread fired exception "+workload+" "+ex);
@@ -232,5 +236,9 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
    
   }
 
+  @Override
+  public long getProcessingTime() {
+    return processingTime.get();
+  }
 
 }

@@ -4,4 +4,5 @@ public interface WorkerThreadMBean {
   public String getJSONSerializedWorkload();
   public void terminate();
   public long getMessagesProcessesed();
+  public long getProcessingTime();
 }

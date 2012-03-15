@@ -400,4 +400,21 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     }
     return null;
   }
+
+  @Override
+  public List<String> getInstancesRunningWorkload(String workloadName) {
+    List<String> results = new ArrayList<String>();
+    try {
+      for (Workload w : getAllWorkloads()) {
+        if (w.name.equals(workloadName)){
+         results.addAll(zk.getChildren("/ironcount/workloads/" + w.name, false));
+        }
+      }
+    } catch (KeeperException ex) {
+      throw new RuntimeException(ex);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+    return results;
+  }
 }

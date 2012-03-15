@@ -21,7 +21,6 @@ import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -157,6 +156,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
               if (goOn){
                 handler.handleMessage(message);
                 messagesProcessesed.addAndGet(1);
+
               }
             } catch (Exception ex){
               logger.error("worker thread fired exception "+workload+" "+ex);

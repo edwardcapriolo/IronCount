@@ -307,7 +307,7 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
   public List<Workload> getAllWorkloads() {
     List<Workload> all = new ArrayList<Workload>();
     try {
-      List<String> children = zk.getChildren("/ironcount/workloads/", false);
+      List<String> children = zk.getChildren("/ironcount/workloads", false);
       for (String child : children) {
         Stat s = zk.exists("/ironcount/workloads/" + child, false);
         byte[] b = zk.getData("/ironcount/workloads/" + child, false, s);
@@ -377,5 +377,21 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     return threadPoolSize;
   }
 
+  @Override
+  public List<String> getConfiguredWorkloadNames(){
+    List<String> result  = new ArrayList<String>();
+    try {
+    List<Workload> wlist = this.getAllWorkloads();
+    
+    for (Workload w:wlist){
+      result.add(w.name);
+    }
+    String [] names = new String[result.size()];
+    for (int i =0;i<names.length;i++){
+      names[i]=result.get(i);
+    }
+    } catch (Exception ex){ex.printStackTrace();}
+    return result;
+  }
 
 }

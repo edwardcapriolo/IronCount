@@ -5,6 +5,8 @@
 
 package com.jointhegrid.ironcount.manager;
 
+import java.util.List;
+
 /**
  *
  * @author edward
@@ -17,4 +19,5 @@ public interface WorkloadManagerMBean {
   public int getThreadPoolSize();
 
   public void applyWorkload(String workloadAsJson);
+  public List<String> getConfiguredWorkloadNames();
 }

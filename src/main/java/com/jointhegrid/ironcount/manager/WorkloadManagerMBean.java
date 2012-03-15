@@ -20,4 +20,5 @@ public interface WorkloadManagerMBean {
 
   public void applyWorkload(String workloadAsJson);
   public List<String> getConfiguredWorkloadNames();
+  public String getWorkloadAsJSON(String workloadName);
 }

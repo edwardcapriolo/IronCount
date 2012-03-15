@@ -380,9 +380,7 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
   @Override
   public List<String> getConfiguredWorkloadNames(){
     List<String> result  = new ArrayList<String>();
-    try {
     List<Workload> wlist = this.getAllWorkloads();
-    
     for (Workload w:wlist){
       result.add(w.name);
     }
@@ -390,8 +388,16 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     for (int i =0;i<names.length;i++){
       names[i]=result.get(i);
     }
-    } catch (Exception ex){ex.printStackTrace();}
     return result;
   }
 
+  @Override
+  public String getWorkloadAsJSON(String workloadName) {
+    for (Workload w:getAllWorkloads()){
+      if (w.name.equals(workloadName)){
+        return new String(this.serializeWorkload(w));
+      }
+    }
+    return null;
+  }
 }

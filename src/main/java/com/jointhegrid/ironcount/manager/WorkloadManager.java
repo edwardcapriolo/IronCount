@@ -182,7 +182,6 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
     String name = parts[3];
     for (WorkerThread wt : this.workerThreads.keySet()){
       if (wt.workload.name.equals(name)){
-        //wt.executor.shutdown();
         wt.goOn=false;
         wt.terminate();
       }
@@ -192,7 +191,7 @@ public class WorkloadManager implements Watcher,WorkloadManagerMBean {
   public void considerStarting(List<String> workloads){
     
     if (this.workerThreads.size()>=this.threadPoolSize){
-      logger.warn("Already at thread pool size wont start a worker");
+      logger.warn("Already at thread pool max size. Will not start a worker");
       return;
     }
     logger.debug("consider starting "+ workloads);

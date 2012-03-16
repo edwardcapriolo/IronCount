@@ -121,8 +121,8 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     consumerConnector = Consumer.createJavaConsumerConnector(config);
     
     try {
-      //handler = (MessageHandler) Class.forName(this.workload.messageHandlerName).newInstance();
-      handler = (MessageHandler) new ICURLClassLoader().getClassLoader(workload).loadClass(this.workload.messageHandlerName).newInstance();
+      handler = (MessageHandler) new ICURLClassLoader().getClassLoader(workload)
+              .loadClass(this.workload.messageHandlerName).newInstance();
     } catch (Exception ex) {
       logger.error(ex);
       this.terminate();
@@ -233,7 +233,6 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
   @Override
   protected void finalize() throws Throwable {
     super.finalize();
-   
   }
 
   @Override

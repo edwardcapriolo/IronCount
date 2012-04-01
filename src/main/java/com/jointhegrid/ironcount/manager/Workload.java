@@ -28,7 +28,8 @@ public class Workload {
   public String zkConnect;
   public Integer maxWorkers;
   public Map<String, String> properties;
-  public Boolean active;//want to use this
+  public Boolean active;
+  //public byte [] serializedHandler;//thinking about this
   public List<URL> classloaderUrls;
 
   public Workload() {

@@ -17,7 +17,7 @@ package com.jointhegrid.ironcount.manager;
 
 import kafka.message.Message;
 
-public interface MessageHandler {
+public interface MessageHandler extends java.io.Serializable {
   public void setWorkload(Workload w);
   public void handleMessage(Message m) ;
   public void stop();

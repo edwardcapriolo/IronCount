@@ -21,7 +21,7 @@ import com.jointhegrid.ironcount.manager.WorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import kafka.message.Message;
 
-public class SimpleMessageHandler implements MessageHandler{
+public class SimpleMessageHandler implements MessageHandler,java.io.Serializable{
 
   public static AtomicInteger messageCount;
   public static AtomicInteger handlerCount;

@@ -25,7 +25,13 @@
       <version>1.0-2</version>
       <scope>test</scope>
     </dependency>
-
+<dependency>
+	<groupId>org.eclipse.jetty</groupId>
+	<artifactId>jetty-server</artifactId>
+	<version>8.1.0.RC5</version>
+</dependency>
+            
+            
     <!-- lock recipe taken vs cages
     <dependency>
           <groupId>org.scale7</groupId>

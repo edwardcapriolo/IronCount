@@ -20,6 +20,7 @@ A Workload is an object that stores several pieces of information.
 * maxWorkers: Maximum number of instances of MessageHander to run across the cluster
 * properties: A map of properties that can be used for configuration
 * active: a flag to start or pause workloads
+* classloaderUrls: if specified as list of URLs used for URL class loading
 
 In a serialized form a workload looks like this:
 
@@ -35,7 +36,8 @@ In a serialized form a workload looks like this:
     }
 
 To start a Workload create a JSON clob like the one above and save it to a file. Then use
-DeployTool to write this entry to ZooKeeper. At this point WorkloadManagers should notice
+DeployTool to write this entry to ZooKeeper. You can also use JMX and the applyWorkload(String) operation. 
+After the change is applied the WorkloadManagers should notice
 the changes to zookeeper and start instances of the Workload.
 
 Extending
@@ -66,6 +68,11 @@ once. Then each kafka message is passed to the `handleMessage(Message m)` method
       @Override
       public void setWorkerThread(WorkerThread wt) {
       }
+    
+      @Override
+      public void stop(){
+      }
+
     }
 
 Demos
@@ -202,7 +209,7 @@ The example workload writes all queue data to a local file. Open a tail session 
 
 In another window use the Kafka producer shell to send messages that Kafka and IronCount process to finally be written to the file. They should appear in the file.
 
-   bin/kafka-producer-shell.sh --server kafka://localhost:9092 --topic topic1
+    bin/kafka-producer-shell.sh --server kafka://localhost:9092 --topic topic1
 
 
 

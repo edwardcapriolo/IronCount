@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Stack;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -62,9 +63,9 @@ public class MockingBirdMessageHandler implements MessageHandler {
   incr com/domain/sub by 1
   incr com/domain/sub/myurl.s by 1
    */
-  public void handleMessage(Message m) {
+  public void handleMessage(MessageAndMetadata<Message> m) {
 
-    String url = getMessage(m);
+    String url = getMessage(m.message());
     URI i = URI.create(url);
     String domain = i.getHost();
     String path = i.getPath();

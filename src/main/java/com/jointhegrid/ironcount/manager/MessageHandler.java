@@ -16,10 +16,11 @@ limitations under the License.
 package com.jointhegrid.ironcount.manager;
 
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 
 public interface MessageHandler extends java.io.Serializable {
   public void setWorkload(Workload w);
-  public void handleMessage(Message m) ;
+  public void handleMessage(MessageAndMetadata<Message> m) ;
   public void stop();
   public void setWorkerThread(WorkerThread wt) ; //just to call commit
 }

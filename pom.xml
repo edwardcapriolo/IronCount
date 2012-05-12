@@ -4,7 +4,7 @@
   <groupId>com.jointhegrid</groupId>
   <artifactId>ironcount</artifactId>
   <name>ironcount</name>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <description></description>
   <packaging>jar</packaging>
 	
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>org.clojars.smallrivers</groupId>
       <artifactId>kafka</artifactId>
-      <version>0.7.0</version>
+      <version>0.7.1-SNAPSHOT</version>
     </dependency>
 
     <!-- caligraphy demo -->

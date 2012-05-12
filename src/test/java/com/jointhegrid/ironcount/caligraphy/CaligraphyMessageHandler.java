@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,8 +37,8 @@ public class CaligraphyMessageHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(Message m) {
-    String s = getMessage(m);
+  public void handleMessage(MessageAndMetadata<Message> m) {
+    String s = getMessage(m.message());
     String key = s.substring(0,s.indexOf("|"));
     String rest = s.substring(s.indexOf("|")+1);
     if ( this.outs.containsKey(key) ){

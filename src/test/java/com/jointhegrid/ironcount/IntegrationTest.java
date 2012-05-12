@@ -20,9 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kafka.consumer.KafkaMessageStream;
+import kafka.consumer.KafkaStream;
 import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import org.junit.Test;
 
 public class IntegrationTest extends IronIntegrationTest {
@@ -35,14 +36,14 @@ public class IntegrationTest extends IronIntegrationTest {
 
     Map<String, Integer> consumers = new HashMap<String, Integer>();
     consumers.put(this.topic, 1);
-    Map<String, List<KafkaMessageStream<Message>>> topicMessageStreams =
+    Map<String, List<KafkaStream<Message>>> topicMessageStreams =
             consumerConnector.createMessageStreams(consumers);
-    List<KafkaMessageStream<Message>> streams = topicMessageStreams.get(this.topic);
+    List<KafkaStream<Message>> streams = topicMessageStreams.get(this.topic);
 
     int x=0;
     // consume the messages in the threads
-    for (KafkaMessageStream<Message> stream : streams) {
-      for (Message message : stream) {
+    for (KafkaStream<Message> stream : streams) {
+      for (MessageAndMetadata message : stream) {
         System.out.println(getMessage(message));
         x++;
         if (x==2){
@@ -53,8 +54,8 @@ public class IntegrationTest extends IronIntegrationTest {
     
   }
 
-  public static String getMessage(Message message) {
-    ByteBuffer buffer = message.payload();
+  public static String getMessage(MessageAndMetadata<Message> message) {
+    ByteBuffer buffer = message.message().payload();
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
     return new String(bytes);

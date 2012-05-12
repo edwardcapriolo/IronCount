@@ -6,6 +6,7 @@ import com.jointhegrid.ironcount.manager.WorkerThread;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 
 public class SerializedHandler implements MessageHandler {
 
@@ -23,9 +24,9 @@ public class SerializedHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(Message m) {
+  public void handleMessage(MessageAndMetadata<Message> m) {
     messageCount.addAndGet(1);
-    System.out.println("handlerId:" + myId + " message:" + getMessage(m));
+    System.out.println("handlerId:" + myId + " message:" + getMessage(m.message()));
   }
 
   @Override

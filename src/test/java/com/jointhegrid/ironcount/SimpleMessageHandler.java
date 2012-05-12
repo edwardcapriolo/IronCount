@@ -20,6 +20,7 @@ import com.jointhegrid.ironcount.manager.MessageHandler;
 import com.jointhegrid.ironcount.manager.WorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 
 public class SimpleMessageHandler implements MessageHandler,java.io.Serializable{
 
@@ -37,9 +38,9 @@ public class SimpleMessageHandler implements MessageHandler,java.io.Serializable
   }
 
   @Override
-  public void handleMessage(Message m) {
+  public void handleMessage(MessageAndMetadata<Message> m) {
     messageCount.addAndGet(1);
-    System.out.println("handlerId:"+ myId+" message:"+ IronIntegrationTest.getMessage(m));
+    System.out.println("handlerId:"+ myId+" message:"+ IronIntegrationTest.getMessage(m.message()));
   }
 
   @Override

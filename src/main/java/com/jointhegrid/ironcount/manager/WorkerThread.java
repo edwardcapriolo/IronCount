@@ -27,9 +27,10 @@ import javax.management.ObjectName;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.KafkaMessageStream;
+import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -145,15 +146,15 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
-    Map<String,List<KafkaMessageStream<Message>>> topicMessageStreams =
+    Map<String,List<KafkaStream<Message>>> topicMessageStreams =
             consumerConnector.createMessageStreams(consumers);
-    List<KafkaMessageStream<Message>> streams =
+    List<KafkaStream<Message>> streams =
             topicMessageStreams.get(workload.topic);
 
-    for(final KafkaMessageStream<Message> stream: streams) {
+    for(final KafkaStream<Message> stream: streams) {
       executor.submit(new Runnable() {
         public void run() {
-          for(Message message: stream) {
+          for(MessageAndMetadata message: stream) {
             try {
               if (goOn){
                 long before=System.nanoTime();

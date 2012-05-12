@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import org.apache.log4j.Logger;
 
 public class MessageToFileHandler implements MessageHandler {
@@ -44,8 +45,8 @@ public class MessageToFileHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(Message m) {
-    String s = getMessage(m);
+  public void handleMessage(MessageAndMetadata<Message> m) {
+    String s = getMessage(m.message());
     try {
       System.out.println(s);
       fw.write(s+"\n");

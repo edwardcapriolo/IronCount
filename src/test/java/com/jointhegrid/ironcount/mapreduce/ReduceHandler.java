@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -48,8 +49,8 @@ public class ReduceHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(Message m) {
-    String line = getMessage(m);
+  public void handleMessage(MessageAndMetadata<Message> m) {
+    String line = getMessage(m.message());
     System.out.println("reduce line "+line);
     String[] parts = line.split("\\|");
     String table = parts[0];

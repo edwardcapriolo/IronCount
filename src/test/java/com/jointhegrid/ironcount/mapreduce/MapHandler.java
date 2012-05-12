@@ -24,6 +24,7 @@ import java.util.Properties;
 import kafka.javaapi.producer.Producer;
 import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
+import kafka.message.MessageAndMetadata;
 import kafka.producer.ProducerConfig;
 
 public class MapHandler implements MessageHandler {
@@ -50,12 +51,12 @@ public class MapHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(Message m) {
+  public void handleMessage(MessageAndMetadata<Message> m) {
     //message looks like this
     //users|1:edward
     //or
     //cart|1:saw
-    String line = getMessage(m);
+    String line = getMessage(m.message());
     String[] parts = line.split("\\|");
     String table = parts[0];
     String row = parts[1];

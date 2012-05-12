@@ -62,7 +62,7 @@ once. Then each kafka message is passed to the `handleMessage(Message m)` method
       }
 
       @Override
-      public void handleMessage(Message m) {
+      public void handleMessage(MessageAndMetadata<Message> m) {
       }
 
       @Override

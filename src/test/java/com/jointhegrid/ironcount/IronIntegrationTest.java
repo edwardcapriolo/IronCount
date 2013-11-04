@@ -67,12 +67,54 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     CreateTopicCommand.main(arguments);
     try {
-      Thread.sleep(3000);
+      Thread.sleep(5000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
+
+  public static void createMapTopic() {
+    String[] arguments = new String[8];
+    arguments[0] = "--zookeeper";
+    arguments[1] = LOCAL_ZK_ADDRESS;
+    arguments[2] = "--replica";
+    arguments[3] = "1";
+    arguments[4] = "--partition";
+    arguments[5] = "2";
+    arguments[6] = "--topic";
+    arguments[7] = "map";
+
+    CreateTopicCommand.main(arguments);
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  public static void createReduceTopic() {
+    String[] arguments = new String[8];
+    arguments[0] = "--zookeeper";
+    arguments[1] = LOCAL_ZK_ADDRESS;
+    arguments[2] = "--replica";
+    arguments[3] = "1";
+    arguments[4] = "--partition";
+    arguments[5] = "2";
+    arguments[6] = "--topic";
+    arguments[7] = "reduce";
+
+    CreateTopicCommand.main(arguments);
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
+  
   
   @Before
   public void setupLocal() throws Exception{
@@ -117,15 +159,17 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     config = new KafkaConfig(brokerProps);
 
-    producer = new Producer<Integer,String>(producerConfig);
+    producer = new Producer<String,String>(producerConfig);
 
     
     if (server == null) {
-      server = new kafka.server.KafkaServer(config, null);
+      server = new kafka.server.KafkaServer(config, new kafka.utils.MockTime());
       server.startup();
       consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
     }
     createEventsTopic();
+    createMapTopic();
+    createReduceTopic();
   }
 
   public static String getMessage(Message message) {

@@ -20,10 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.message.Message;
 import kafka.message.MessageAndMetadata;
 import kafka.producer.KeyedMessage;
+import kafka.serializer.StringDecoder;
+import kafka.utils.VerifiableProperties;
 
 import org.junit.Test;
 
@@ -33,26 +36,51 @@ public class IntegrationTest extends IronIntegrationTest {
 
   @Test
   public void hello() {
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "1 b c"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "d e f"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "1 b c"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "d e f"));
 
     Map<String, Integer> consumers = new HashMap<String, Integer>();
     consumers.put(this.EVENTS, 1);
-    Map<String, List<KafkaStream<byte[], byte[]>>> topicMessageStreams =
-            consumerConnector.createMessageStreams(consumers);
-    List<KafkaStream<byte[], byte[]>> streams = topicMessageStreams.get(this.EVENTS);
+    StringDecoder decoder =
+            new StringDecoder(new VerifiableProperties());
+    Map<String, List<KafkaStream<String, String>>> topicMessageStreams =
+            consumerConnector.createMessageStreams(consumers,decoder,decoder);
+    
+    final List<KafkaStream<String, String>> streams = topicMessageStreams.get(this.EVENTS);
 
     int x=0;
     // consume the messages in the threads
-    for (KafkaStream<byte[], byte[]> stream : streams) {
-      for (MessageAndMetadata<byte[], byte[]> message : stream) {
+    System.out.println("Starting consumers");
+    /*
+    for (KafkaStream<String, String> stream : streams) {
+      for (MessageAndMetadata<String, String> message : stream) {
        
         x++;
         if (x==2){
+          System.out.println("breaking");
           break;
+
         }
       }
-    }
+    }*/
+    
+    Thread kafkaMessageReceiverThread = new Thread(
+            new Runnable() {
+                @Override
+                public void run() {
+                  ConsumerIterator i  = streams.get(0).iterator();
+                    while (i.hasNext()) {
+                        String msg = i.next().message().toString();
+                        msg = msg == null ? "<null>" : msg;
+                        System.out.println("got message" + msg);
+  
+                    }
+                }
+            },
+            "kafkaMessageReceiverThread"
+    );
+    kafkaMessageReceiverThread.start();
+    
     
   }
 /*

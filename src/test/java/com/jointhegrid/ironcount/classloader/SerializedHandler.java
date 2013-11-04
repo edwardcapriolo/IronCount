@@ -24,9 +24,9 @@ public class SerializedHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(MessageAndMetadata<Message> m) {
+  public void handleMessage(MessageAndMetadata m) {
     messageCount.addAndGet(1);
-    System.out.println("handlerId:" + myId + " message:" + getMessage(m.message()));
+    System.out.println("handlerId:" + myId + " message:" + m.message().toString());
   }
 
   @Override

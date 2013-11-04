@@ -25,7 +25,7 @@ import com.jointhegrid.ironcount.manager.Workload;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import kafka.javaapi.producer.ProducerData;
+import kafka.producer.KeyedMessage;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
 import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
@@ -61,7 +61,7 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     w.messageHandlerName = "com.jointhegrid.ironcount.mockingbird.MockingBirdMessageHandler";
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
+    w.topic = EVENTS;
     w.zkConnect = "localhost:8888";
 
     //pass the cassandra information to the IronWorker
@@ -82,9 +82,9 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
 
     m.applyWorkload(w);
     
-    producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/stuff"));
-    producer.send(new ProducerData<Integer, String>(topic, "http://toys.ed.com/toys"));
-    producer.send(new ProducerData<Integer, String>(topic, "http://www.ed.com/"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://www.ed.com/stuff"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://toys.ed.com/toys"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://www.ed.com/"));
 
     try {
       Thread.sleep(5000);

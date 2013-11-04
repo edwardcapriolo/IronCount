@@ -22,9 +22,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Properties;
 import kafka.javaapi.producer.Producer;
-import kafka.javaapi.producer.ProducerData;
 import kafka.message.Message;
 import kafka.message.MessageAndMetadata;
+import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
 public class MapHandler implements MessageHandler {
@@ -51,12 +51,12 @@ public class MapHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(MessageAndMetadata<Message> m) {
+  public void handleMessage(MessageAndMetadata m) {
     //message looks like this
     //users|1:edward
     //or
     //cart|1:saw
-    String line = getMessage(m.message());
+    String line = m.message().toString();
     String[] parts = line.split("\\|");
     String table = parts[0];
     String row = parts[1];
@@ -67,9 +67,10 @@ public class MapHandler implements MessageHandler {
     //or
     //partitioner (1) cart|1:saw
 
-    producer.send(new ProducerData<String, String>
+    /*
+    producer.send(new KeyedMessage<String, String>
             ("reduce", columns[0], Arrays.asList(table+"|"+row)));
-
+    */
   }
 
   @Override

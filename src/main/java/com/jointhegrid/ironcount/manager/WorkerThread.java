@@ -27,6 +27,7 @@ import javax.management.ObjectName;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
+import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
@@ -112,12 +113,27 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     }
   }
 
+  public static void putZkConnect(Properties props, String zkconn){
+    props.put("zk.connect", zkconn);
+    props.put("zookeeper.connect", zkconn);
+  }
+  
+  public static void putGroupId(Properties props, String groupId){
+    props.put("groupid", groupId);
+    props.put("group.id", groupId);
+  }
+  
   @Override
   public void run(){
     status=WorkerThreadStatus.INIT;
     props = new Properties();
-    props.put("groupid", workload.consumerGroup);
+    
+    WorkerThread.putGroupId(props, workload.consumerGroup);
+    WorkerThread.putZkConnect(props, workload.zkConnect);
+    /*
     props.put("zk.connect", workload.zkConnect);
+    props.put("zookeeper.connect", workload.zkConnect);
+    */
     config = new ConsumerConfig(props);
     consumerConnector = Consumer.createJavaConsumerConnector(config);
     
@@ -146,19 +162,23 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
-    Map<String,List<KafkaStream<Message>>> topicMessageStreams =
+    Map<String,List<KafkaStream<byte[],byte[]>>> topicMessageStreams =
             consumerConnector.createMessageStreams(consumers);
-    List<KafkaStream<Message>> streams =
+    List<KafkaStream<byte[],byte[]>> streams =
             topicMessageStreams.get(workload.topic);
 
-    for(final KafkaStream<Message> stream: streams) {
+    for(final KafkaStream<byte[], byte[]> stream: streams) {
       executor.submit(new Runnable() {
         public void run() {
           for(MessageAndMetadata message: stream) {
             try {
               if (goOn){
                 long before=System.nanoTime();
+                //ConsumerIterator<byte[], byte[]> it = m_stream.iterator();
+                ConsumerIterator<byte[], byte[]> it = stream.iterator();
+                
                 handler.handleMessage(message);
+               
                 long after=System.nanoTime();
                 processingTime.addAndGet(after-before);
                 messagesProcessesed.addAndGet(1);

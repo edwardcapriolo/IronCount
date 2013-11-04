@@ -20,7 +20,7 @@ import kafka.message.MessageAndMetadata;
 
 public interface MessageHandler extends java.io.Serializable {
   public void setWorkload(Workload w);
-  public void handleMessage(MessageAndMetadata<Message> m) ;
+  public void handleMessage(MessageAndMetadata m) ;
   public void stop();
   public void setWorkerThread(WorkerThread wt) ; //just to call commit
 }

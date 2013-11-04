@@ -63,9 +63,9 @@ public class MockingBirdMessageHandler implements MessageHandler {
   incr com/domain/sub by 1
   incr com/domain/sub/myurl.s by 1
    */
-  public void handleMessage(MessageAndMetadata<Message> m) {
+  public void handleMessage(MessageAndMetadata m) {
 
-    String url = getMessage(m.message());
+    String url = m.message().toString();
     URI i = URI.create(url);
     String domain = i.getHost();
     String path = i.getPath();

@@ -37,8 +37,8 @@ public class CaligraphyMessageHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(MessageAndMetadata<Message> m) {
-    String s = getMessage(m.message());
+  public void handleMessage(MessageAndMetadata m) {
+    String s = m.message().toString();
     String key = s.substring(0,s.indexOf("|"));
     String rest = s.substring(s.indexOf("|")+1);
     if ( this.outs.containsKey(key) ){

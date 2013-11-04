@@ -45,8 +45,8 @@ public class MessageToFileHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(MessageAndMetadata<Message> m) {
-    String s = getMessage(m.message());
+  public void handleMessage(MessageAndMetadata m) {
+    String s = new String( (byte[]) m.message());
     try {
       System.out.println(s);
       fw.write(s+"\n");

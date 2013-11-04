@@ -8,7 +8,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
-import kafka.javaapi.producer.ProducerData;
+
+import kafka.producer.KeyedMessage;
+
 import org.junit.Test;
 
 public class HandlerFromURLIntegrationTest extends IronIntegrationTest {
@@ -22,7 +24,7 @@ public class HandlerFromURLIntegrationTest extends IronIntegrationTest {
     w.messageHandlerName = "com.jointhegrid.fromurl.MessageToFileHandlerFromURL";
     w.name = "fromURL";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
+    w.topic = EVENTS;
     w.zkConnect = "localhost:8888";
     w.classloaderUrls = new ArrayList<URL>();
     w.classloaderUrls.add( new URL("http://localhost:8766/") );
@@ -42,7 +44,7 @@ public class HandlerFromURLIntegrationTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {}
 
     for (int i =0;i<1000;i++){
-      producer.send(new ProducerData<Integer, String>(topic,""+i));
+      producer.send(new KeyedMessage<Integer, String>(EVENTS,""+i));
 
     }
 

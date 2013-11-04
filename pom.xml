@@ -75,11 +75,21 @@
       <artifactId>cassandra-all</artifactId>
       <version>1.0.6</version>
     </dependency>
+
+    <!--
     <dependency>
       <groupId>org.clojars.smallrivers</groupId>
       <artifactId>kafka</artifactId>
       <version>0.7.1-SNAPSHOT</version>
     </dependency>
+    -->
+
+    <dependency>
+	<groupId>com.sksamuel.kafka</groupId>
+	<artifactId>kafka_2.10</artifactId>
+	<version>0.8.0-beta1</version>
+    </dependency>
+            
 
     <!-- caligraphy demo -->
     <dependency>

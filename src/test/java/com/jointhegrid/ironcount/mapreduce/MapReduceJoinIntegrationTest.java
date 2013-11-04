@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.Assert;
-import kafka.javaapi.producer.ProducerData;
+import kafka.producer.KeyedMessage;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
 import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
@@ -108,13 +108,13 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
    // producer.send(new ProducerData<Integer, String>(topic, "2"));
    // producer.send(new ProducerData<Integer, String>(topic, "3"));
 
-    producer.send(new ProducerData<Integer, String>("map", "user|1:edward"));
-    producer.send(new ProducerData<Integer, String>("map", "user|2:nate"));
-    producer.send(new ProducerData<Integer, String>("map", "user|3:stacey"));
+    producer.send(new KeyedMessage<Integer, String>("map", "user|1:edward"));
+    producer.send(new KeyedMessage<Integer, String>("map", "user|2:nate"));
+    producer.send(new KeyedMessage<Integer, String>("map", "user|3:stacey"));
 
-    producer.send(new ProducerData<Integer, String>("map", "cart|1:saw:2.00"));
-    producer.send(new ProducerData<Integer, String>("map", "cart|1:hammer:3.00"));
-    producer.send(new ProducerData<Integer, String>("map", "cart|3:puppy:1.00"));
+    producer.send(new KeyedMessage<Integer, String>("map", "cart|1:saw:2.00"));
+    producer.send(new KeyedMessage<Integer, String>("map", "cart|1:hammer:3.00"));
+    producer.send(new KeyedMessage<Integer, String>("map", "cart|3:puppy:1.00"));
 
 
 

@@ -19,6 +19,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 
+import kafka.admin.CreateTopicCommand;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.javaapi.consumer.ConsumerConnector;
@@ -27,7 +28,11 @@ import kafka.message.Message;
 import kafka.producer.ProducerConfig;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
+import kafka.utils.Time;
+
 import org.junit.Before;
+
+import com.jointhegrid.ironcount.manager.WorkerThread;
 
 public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
@@ -43,10 +48,32 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
   public ProducerConfig producerConfig;
   public ConsumerConfig consumerConfig;
 
-  public String topic="events";
+  public static final String EVENTS = "events";
 
   public static EmbeddedZookeeper zk;
 
+  public static final String LOCAL_ZK_ADDRESS = "localhost:8888";
+  
+  public static void createEventsTopic() {
+    String[] arguments = new String[8];
+    arguments[0] = "--zookeeper";
+    arguments[1] = LOCAL_ZK_ADDRESS;
+    arguments[2] = "--replica";
+    arguments[3] = "1";
+    arguments[4] = "--partition";
+    arguments[5] = "1";
+    arguments[6] = "--topic";
+    arguments[7] = EVENTS;
+
+    CreateTopicCommand.main(arguments);
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
   @Before
   public void setupLocal() throws Exception{
     System.out.println("setup local");
@@ -62,23 +89,27 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     brokerProps = new Properties();
     brokerProps.put("enable.zookeeper","true");
-    brokerProps.put("zk.connect", "localhost:8888");
+    brokerProps.put( "broker.id", "777");
+    WorkerThread.putZkConnect(brokerProps, "localhost:8888");
+    /*
+    brokerProps.put("zk.connect", "localhost:8888");*/
     brokerProps.put("port","9092");
 
     consumerProps = new Properties();
-    consumerProps.put("zk.connect", "localhost:8888");
+    WorkerThread.putZkConnect(consumerProps, "localhost:8888");
 
     producerProps = new Properties();
     producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
-    producerProps.put("zk.connect", "localhost:8888");
-
-    consumerProps.setProperty("groupid", "group1");
+    WorkerThread.putZkConnect(producerProps, "localhost:8888");
+    
+    producerProps.put("metadata.broker.list", "localhost:9092");
+    WorkerThread.putGroupId(consumerProps, "group1");
+    
     consumerConfig = new ConsumerConfig(consumerProps);
     producerConfig = new ProducerConfig(producerProps);
 
-    brokerProps.setProperty("topic.partition.count.map", topic+":2"+",map:2,reduce:2");
+    brokerProps.setProperty("topic.partition.count.map", EVENTS+":2"+",map:2,reduce:2");
     brokerProps.setProperty("num.partitions", "10");
-    brokerProps.setProperty("brokerid", "1");
     brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
 
     File f = new File ("/tmp/ks1logdir");
@@ -88,11 +119,13 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     producer = new Producer<Integer,String>(producerConfig);
 
-    if ( server == null ) {
-      server = new kafka.server.KafkaServer(config);
+    
+    if (server == null) {
+      server = new kafka.server.KafkaServer(config, null);
       server.startup();
       consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
     }
+    createEventsTopic();
   }
 
   public static String getMessage(Message message) {

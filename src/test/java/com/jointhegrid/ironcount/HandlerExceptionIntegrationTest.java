@@ -4,7 +4,9 @@ import com.jointhegrid.ironcount.manager.Workload;
 import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
-import kafka.javaapi.producer.ProducerData;
+
+import kafka.producer.KeyedMessage;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +21,7 @@ public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
     w.messageHandlerName = "com.jointhegrid.ironcount.HeartAttachHandler";
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
+    w.topic = EVENTS;
     w.zkConnect = "localhost:8888";
 
     Properties p = new Properties();
@@ -33,8 +35,8 @@ public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
     m2.init();
 
 
-    producer.send(new ProducerData<Integer, String>(topic, "1"));
-    producer.send(new ProducerData<Integer, String>(topic, "2"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "1"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "2"));
 
 
 
@@ -46,17 +48,17 @@ public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
     }
     Assert.assertEquals(1, m.getWorkerThreads().size());
     Assert.assertEquals(1, m2.getWorkerThreads().size());
-    producer.send(new ProducerData<Integer, String>(topic, "3"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "3"));
 
-    producer.send(new ProducerData<Integer, String>(topic, "4"));
-    producer.send(new ProducerData<Integer, String>(topic, "5"));
-    producer.send(new ProducerData<Integer, String>(topic, "6"));
-    producer.send(new ProducerData<Integer, String>(topic, "7"));
-    producer.send(new ProducerData<Integer, String>(topic, "8"));
-    producer.send(new ProducerData<Integer, String>(topic, "9"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "4"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "5"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "6"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "7"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "8"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "9"));
 
-    producer.send(new ProducerData<Integer, String>(topic, "10"));
-    producer.send(new ProducerData<Integer, String>(topic, "11"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "10"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "11"));
     try {
       Thread.sleep(12000);
     } catch (InterruptedException ex) {

@@ -19,7 +19,7 @@ public class ClassNotFoundTestIntegrationTest
     w.messageHandlerName = "bad.class.name";
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
+    w.topic = EVENTS;
     w.zkConnect = "localhost:8888";
 
     Properties p = new Properties();

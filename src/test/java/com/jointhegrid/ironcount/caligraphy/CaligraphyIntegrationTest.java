@@ -16,7 +16,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import kafka.javaapi.producer.ProducerData;
 import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.query.CounterQuery;
@@ -28,6 +27,7 @@ import org.junit.Test;
  *
  * @author edward
  */
+/*
 public class CaligraphyIntegrationTest extends IronIntegrationTest {
 
    @Test
@@ -88,3 +88,4 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
   }
 
 }
+*/

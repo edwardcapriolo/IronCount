@@ -19,7 +19,8 @@ import com.jointhegrid.ironcount.manager.Workload;
 import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
-import kafka.javaapi.producer.ProducerData;
+import kafka.producer.KeyedMessage;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     w.messageHandlerName = "com.jointhegrid.ironcount.SimpleMessageHandler";
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
+    w.topic = EVENTS;
     w.zkConnect = "localhost:8888";
 
     Properties p = new Properties();
@@ -51,9 +52,9 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     }
    
 
-    producer.send(new ProducerData<Integer, String>(topic, "1"));
-    producer.send(new ProducerData<Integer, String>(topic, "2"));
-    producer.send(new ProducerData<Integer, String>(topic, "3"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "1"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "2"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "3"));
 
     try {
       Thread.sleep(9000);
@@ -68,8 +69,8 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     } catch (InterruptedException ex) {
     }
 
-    producer.send(new ProducerData<Integer, String>(topic, "4"));
-    producer.send(new ProducerData<Integer, String>(topic, "5"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "4"));
+    producer.send(new KeyedMessage<Integer, String>(EVENTS, "5"));
 
     try {
       Thread.sleep(3000);

@@ -49,8 +49,8 @@ public class ReduceHandler implements MessageHandler {
   }
 
   @Override
-  public void handleMessage(MessageAndMetadata<Message> m) {
-    String line = getMessage(m.message());
+  public void handleMessage(MessageAndMetadata m) {
+    String line = m.message().toString();
     System.out.println("reduce line "+line);
     String[] parts = line.split("\\|");
     String table = parts[0];

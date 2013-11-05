@@ -19,6 +19,9 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import junit.framework.Assert;
 
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
@@ -35,10 +38,13 @@ public class IntegrationTest extends IronIntegrationTest {
 
 
   @Test
-  public void hello() {
-    producer.send(new KeyedMessage<String, String>(EVENTS, "1 b c"));
-    producer.send(new KeyedMessage<String, String>(EVENTS, "d e f"));
-
+  public void hello() throws InterruptedException {
+    for (int i =0;i<2000;i++){
+      producer.send(new KeyedMessage<String, String>(EVENTS,"1", "1 b c"));
+      producer.send(new KeyedMessage<String, String>(EVENTS,"1", "d e f"));
+    }
+    
+    producer.close();
     Map<String, Integer> consumers = new HashMap<String, Integer>();
     consumers.put(this.EVENTS, 1);
     StringDecoder decoder =
@@ -47,40 +53,37 @@ public class IntegrationTest extends IronIntegrationTest {
             consumerConnector.createMessageStreams(consumers,decoder,decoder);
     
     final List<KafkaStream<String, String>> streams = topicMessageStreams.get(this.EVENTS);
-
-    int x=0;
+    System.out.println("Streams size"+ streams.size());
+    
     // consume the messages in the threads
     System.out.println("Starting consumers");
-    /*
-    for (KafkaStream<String, String> stream : streams) {
-      for (MessageAndMetadata<String, String> message : stream) {
-       
-        x++;
-        if (x==2){
-          System.out.println("breaking");
-          break;
-
+   
+    
+    final AtomicInteger in = new AtomicInteger();
+    
+    
+    final ConsumerIterator i = streams.get(0).iterator();
+    
+    
+    Thread kafkaMessageReceiverThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        
+       try {
+        while (i.hasNext() && in.get() <= 2000) {
+          String msg = i.next().message().toString();
+          System.out.println(msg);
+          System.out.println(in.get());
+          in.incrementAndGet();
         }
+       } catch (Exception ex){
+         ex.printStackTrace();
+       }
       }
-    }*/
-    
-    Thread kafkaMessageReceiverThread = new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                  ConsumerIterator i  = streams.get(0).iterator();
-                    while (i.hasNext()) {
-                        String msg = i.next().message().toString();
-                        msg = msg == null ? "<null>" : msg;
-                        System.out.println("got message" + msg);
-  
-                    }
-                }
-            },
-            "kafkaMessageReceiverThread"
-    );
+    }, "kafkaMessageReceiverThread");
     kafkaMessageReceiverThread.start();
-    
+    kafkaMessageReceiverThread.join();
+    Assert.assertEquals(20000, in.get());
     
   }
 /*

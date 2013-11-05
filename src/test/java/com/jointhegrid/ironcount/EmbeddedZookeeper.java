@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.server.NIOServerCnxn;
+import org.apache.zookeeper.server.NIOServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
 
 public class EmbeddedZookeeper {
@@ -31,7 +32,7 @@ public class EmbeddedZookeeper {
   String logDir = "/tmp/zklog";
   ZooKeeperServer zk;
   ZkClient client;
-  NIOServerCnxn.Factory factory;
+  NIOServerCnxnFactory factory;
   int port;
 
   public EmbeddedZookeeper(int port) {
@@ -44,7 +45,9 @@ public class EmbeddedZookeeper {
     File lg = new File(logDir);
     lg.mkdir();
     zk = new ZooKeeperServer(sn, lg, 3000);
-    factory = new NIOServerCnxn.Factory(new InetSocketAddress("localhost", port));
+    factory = new NIOServerCnxnFactory();
+    //new InetSocketAddress("localhost", port)
+    factory.configure(new InetSocketAddress("localhost", port), 1024);
     factory.startup(zk);
     client = new ZkClient("localhost:" + port);
     client.setZkSerializer(new StringSerializer());

@@ -67,7 +67,7 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     CreateTopicCommand.main(arguments);
     try {
-      Thread.sleep(5000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -87,7 +87,7 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     CreateTopicCommand.main(arguments);
     try {
-      Thread.sleep(5000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -107,7 +107,7 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
     CreateTopicCommand.main(arguments);
     try {
-      Thread.sleep(5000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -143,6 +143,11 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
     producerProps = new Properties();
     producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
     WorkerThread.putZkConnect(producerProps, "localhost:8888");
+    producerProps.setProperty("batch.size", "1");
+    producerProps.setProperty("queue.time", "100");
+    producerProps.setProperty("queue.size", "1");
+    producerProps.setProperty("batch.num.messages", "1");
+    producerProps.setProperty("producer.type", "async");
     
     producerProps.put("metadata.broker.list", "localhost:9092");
     WorkerThread.putGroupId(consumerProps, "group1");

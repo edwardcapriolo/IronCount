@@ -164,6 +164,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     consumers.put(workload.topic, 1);
     Map<String,List<KafkaStream<byte[],byte[]>>> topicMessageStreams =
             consumerConnector.createMessageStreams(consumers);
+    logger.info("stream size"+ topicMessageStreams.size());
     List<KafkaStream<byte[],byte[]>> streams =
             topicMessageStreams.get(workload.topic);
 

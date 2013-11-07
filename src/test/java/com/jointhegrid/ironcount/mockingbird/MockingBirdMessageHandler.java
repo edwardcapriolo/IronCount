@@ -83,6 +83,7 @@ public class MockingBirdMessageHandler implements MessageHandler {
   }
 
   public void countIt(String s) {
+    System.out.println("message into handler "+s);
     try {
       Mutator<String> m = HFactory.createMutator(keyspace, StringSerializer.get());
       HCounterColumn<String> hc = HFactory.createCounterColumn("count", 1L);
@@ -92,13 +93,6 @@ public class MockingBirdMessageHandler implements MessageHandler {
     } catch (Exception ex) {
       System.out.println(ex);
     }
-  }
-
-  public static String getMessage(Message message) {
-    ByteBuffer buffer = message.payload();
-    byte[] bytes = new byte[buffer.remaining()];
-    buffer.get(bytes);
-    return new String(bytes);
   }
 
   @Override

@@ -4,14 +4,20 @@ import com.jointhegrid.ironcount.manager.Workload;
 import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
+
+import kafka.javaapi.producer.Producer;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ClassNotFoundTestIntegrationTest
         extends IronIntegrationTest {
 
+  private static String EVENTS = "events";
   @Test
   public void disableWorkload(){
+    createTopic(EVENTS, 1, 1);
+    
     Workload w = new Workload();
     w.active = true;
     w.consumerGroup = "group1";
@@ -20,10 +26,10 @@ public class ClassNotFoundTestIntegrationTest
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
     w.topic = EVENTS;
-    w.zkConnect = "localhost:8888";
+    w.zkConnect = this.zookeeperTestServer.getConnectString();
 
     Properties p = new Properties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    p.put(WorkloadManager.ZK_SERVER_LIST, this.zookeeperTestServer.getConnectString());
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 

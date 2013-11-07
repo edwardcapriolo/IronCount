@@ -12,13 +12,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package com.jointhegrid.ironcount;
 
 import com.jointhegrid.ironcount.manager.Workload;
 import com.jointhegrid.ironcount.manager.WorkloadManager;
 import java.util.HashMap;
 import java.util.Properties;
+
+import kafka.consumer.Consumer;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 
 import org.junit.Assert;
@@ -26,8 +30,13 @@ import org.junit.Test;
 
 public class DisableWorkloadTest extends IronIntegrationTest {
 
+  private static String EVENTS = "events";
+
   @Test
-  public void disableWorkload(){
+  public void disableWorkload() {
+    createTopic(EVENTS, 1, 1);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
+
     Workload w = new Workload();
     w.active = true;
     w.consumerGroup = "group1";
@@ -36,48 +45,46 @@ public class DisableWorkloadTest extends IronIntegrationTest {
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
     w.topic = EVENTS;
-    w.zkConnect = "localhost:8888";
+    w.zkConnect = super.zookeeperTestServer.getConnectString();
 
     Properties p = new Properties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    p.put(WorkloadManager.ZK_SERVER_LIST, super.zookeeperTestServer.getConnectString());
     SimpleMessageHandler sh = new SimpleMessageHandler();
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
-    //dl.startWorkload(w);
     m.applyWorkload(w);
     try {
       Thread.sleep(3000);
     } catch (InterruptedException ex) {
     }
-   
 
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "1"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "2"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "3"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "1"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "2"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "3"));
 
     try {
       Thread.sleep(9000);
     } catch (InterruptedException ex) {
     }
 
-    w.active=false;
+    w.active = false;
     m.applyWorkload(w);
-
-     try {
-      Thread.sleep(3000);
-    } catch (InterruptedException ex) {
-    }
-
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "4"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "5"));
 
     try {
       Thread.sleep(3000);
     } catch (InterruptedException ex) {
     }
 
-    Assert.assertEquals(3,sh.messageCount.get());
+    producer.send(new KeyedMessage<String, String>(EVENTS, "4"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "5"));
+
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException ex) {
+    }
+
+    Assert.assertEquals(3, sh.messageCount.get());
     m.shutdown();
   }
 }

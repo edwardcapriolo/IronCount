@@ -40,14 +40,18 @@ public class MapHandler implements MessageHandler {
     
   }
 
+
   @Override
   public void setWorkload(Workload w) {
-    this.w=w;
+    this.w = w;
     producerProps = new Properties();
     producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
-    producerProps.put("zk.connect", w.properties.get("zk.connect"));
+    WorkerThread.putZkConnect(producerProps, w.properties.get("zk.connect"));
+    producerProps.setProperty("producer.type", "async");
+    // TODO this is a hard code
+    producerProps.put("metadata.broker.list", "localhost:9092");
     producerConfig = new ProducerConfig(producerProps);
-    producer = new Producer<String,String>(producerConfig);
+    producer = new Producer<String, String>(producerConfig);
   }
 
   @Override
@@ -67,10 +71,10 @@ public class MapHandler implements MessageHandler {
     //or
     //partitioner (1) cart|1:saw
 
-    /*
+    System.out.println("line");
     producer.send(new KeyedMessage<String, String>
-            ("reduce", columns[0], Arrays.asList(table+"|"+row)));
-    */
+            ("reduce", columns[0], table+"|"+row));
+    
   }
 
   @Override
@@ -78,12 +82,13 @@ public class MapHandler implements MessageHandler {
     this.wt=wt;
   }
 
+  /*
   public static String getMessage(Message message) {
     ByteBuffer buffer = message.payload();
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
     return new String(bytes);
-  }
+  }*/
 
   @Override
   public void stop() {

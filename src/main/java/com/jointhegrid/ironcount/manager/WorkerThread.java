@@ -32,6 +32,9 @@ import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.Message;
 import kafka.message.MessageAndMetadata;
+import kafka.serializer.StringDecoder;
+import kafka.utils.VerifiableProperties;
+
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -130,10 +133,7 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
     
     WorkerThread.putGroupId(props, workload.consumerGroup);
     WorkerThread.putZkConnect(props, workload.zkConnect);
-    /*
-    props.put("zk.connect", workload.zkConnect);
-    props.put("zookeeper.connect", workload.zkConnect);
-    */
+
     config = new ConsumerConfig(props);
     consumerConnector = Consumer.createJavaConsumerConnector(config);
     
@@ -162,24 +162,22 @@ public class WorkerThread implements Runnable, Watcher, WorkerThreadMBean {
 
     Map<String,Integer> consumers = new HashMap<String,Integer>();
     consumers.put(workload.topic, 1);
-    Map<String,List<KafkaStream<byte[],byte[]>>> topicMessageStreams =
-            consumerConnector.createMessageStreams(consumers);
+    StringDecoder decoder = new StringDecoder(new VerifiableProperties());
+    Map<String,List<KafkaStream<String,String>>> topicMessageStreams =
+            consumerConnector.createMessageStreams(consumers, decoder, decoder);
     logger.info("stream size"+ topicMessageStreams.size());
-    List<KafkaStream<byte[],byte[]>> streams =
+    List<KafkaStream<String,String>> streams =
             topicMessageStreams.get(workload.topic);
 
-    for(final KafkaStream<byte[], byte[]> stream: streams) {
+    for(final KafkaStream<String, String> stream: streams) {
       executor.submit(new Runnable() {
         public void run() {
           for(MessageAndMetadata message: stream) {
             try {
               if (goOn){
                 long before=System.nanoTime();
-                //ConsumerIterator<byte[], byte[]> it = m_stream.iterator();
-                ConsumerIterator<byte[], byte[]> it = stream.iterator();
-                
+                ConsumerIterator<String, String> it = stream.iterator();
                 handler.handleMessage(message);
-               
                 long after=System.nanoTime();
                 processingTime.addAndGet(after-before);
                 messagesProcessesed.addAndGet(1);

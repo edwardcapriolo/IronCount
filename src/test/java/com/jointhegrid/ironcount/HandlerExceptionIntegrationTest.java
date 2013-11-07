@@ -2,9 +2,14 @@ package com.jointhegrid.ironcount;
 
 import com.jointhegrid.ironcount.manager.Workload;
 import com.jointhegrid.ironcount.manager.WorkloadManager;
+
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Properties;
 
+import kafka.consumer.Consumer;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 
 import org.junit.Assert;
@@ -12,8 +17,14 @@ import org.junit.Test;
 
 public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
 
+  private static String EVENTS = "events";
+
   @Test
   public void disableWorkload() {
+
+    createTopic(EVENTS, 1, 1);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
+
     Workload w = new Workload();
     w.active = true;
     w.consumerGroup = "group1";
@@ -22,10 +33,10 @@ public class HandlerExceptionIntegrationTest extends IronIntegrationTest {
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
     w.topic = EVENTS;
-    w.zkConnect = "localhost:8888";
+    w.zkConnect = super.zookeeperTestServer.getConnectString();
 
     Properties p = new Properties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    p.put(WorkloadManager.ZK_SERVER_LIST, super.zookeeperTestServer.getConnectString());
     HeartAttachHandler h = new HeartAttachHandler();
 
     WorkloadManager m = new WorkloadManager(p);

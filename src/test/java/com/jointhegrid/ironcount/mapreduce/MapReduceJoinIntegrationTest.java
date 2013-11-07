@@ -23,6 +23,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.Assert;
+import kafka.consumer.Consumer;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
@@ -45,7 +48,12 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
   @Test
   public void mapReduceJoin() {
 
-     KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mr");
+    createTopic("map", 1, 2);
+    createTopic("reduce", 1, 2);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
+   
+   
+    KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mr");
     cluster.addKeyspace(ksDef, true);
     Keyspace mr = HFactory.createKeyspace("mr", cluster);
     CqlQuery<String, String, String> cqlQuery = new CqlQuery<String, String, String>(mr, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
@@ -74,7 +82,7 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
     reducer.properties.put("mr.ks", "mr");
 
     reducer.topic = "reduce";
-    reducer.zkConnect = "localhost:8888";
+    reducer.zkConnect = this.zookeeperTestServer.getConnectString();
 
     Workload mapper = new Workload();
     mapper.active = true;
@@ -83,14 +91,14 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
     mapper.messageHandlerName = "com.jointhegrid.ironcount.mapreduce.MapHandler";
     mapper.name = "map";
     mapper.properties = new HashMap<String, String>();
-    mapper.properties.put("zk.connect", "localhost:8888");
+    mapper.properties.put("zk.connect", this.zookeeperTestServer.getConnectString());
     mapper.topic = "map";
-    mapper.zkConnect = "localhost:8888";
+    mapper.zkConnect = this.zookeeperTestServer.getConnectString();
 
 
 
     Properties p = System.getProperties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    p.put(WorkloadManager.ZK_SERVER_LIST, this.zookeeperTestServer.getConnectString());
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
@@ -104,17 +112,13 @@ public class MapReduceJoinIntegrationTest extends IronIntegrationTest {
               .log(Level.SEVERE, null, ex);
     }
 
-   // producer.send(new ProducerData<Integer, String>(topic, "1"));
-   // producer.send(new ProducerData<Integer, String>(topic, "2"));
-   // producer.send(new ProducerData<Integer, String>(topic, "3"));
+    producer.send(new KeyedMessage<String, String>("map", "user|1:edward"));
+    producer.send(new KeyedMessage<String, String>("map", "user|2:nate"));
+    producer.send(new KeyedMessage<String, String>("map", "user|3:stacey"));
 
-    producer.send(new KeyedMessage<Integer, String>("map", "user|1:edward"));
-    producer.send(new KeyedMessage<Integer, String>("map", "user|2:nate"));
-    producer.send(new KeyedMessage<Integer, String>("map", "user|3:stacey"));
-
-    producer.send(new KeyedMessage<Integer, String>("map", "cart|1:saw:2.00"));
-    producer.send(new KeyedMessage<Integer, String>("map", "cart|1:hammer:3.00"));
-    producer.send(new KeyedMessage<Integer, String>("map", "cart|3:puppy:1.00"));
+    producer.send(new KeyedMessage<String, String>("map", "cart|1:saw:2.00"));
+    producer.send(new KeyedMessage<String, String>("map", "cart|1:hammer:3.00"));
+    producer.send(new KeyedMessage<String, String>("map", "cart|3:puppy:1.00"));
 
 
 

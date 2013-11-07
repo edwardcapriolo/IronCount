@@ -25,6 +25,10 @@ import com.jointhegrid.ironcount.manager.Workload;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+
+import kafka.consumer.Consumer;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import me.prettyprint.cassandra.model.CqlQuery;
 import me.prettyprint.cassandra.model.CqlRows;
@@ -41,9 +45,12 @@ import org.junit.Test;
 
 public class MockingBirdIntegrationTest extends IronIntegrationTest {
 
-  
+  private static final String EVENTS = "events";
   @Test
   public void mockingBirdDemo() {
+    
+    createTopic(EVENTS, 1, 1);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
 
     KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition("mockingbird");
     cluster.addKeyspace(ksDef, true);
@@ -62,7 +69,7 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     w.name = "testworkload";
     w.properties = new HashMap<String, String>();
     w.topic = EVENTS;
-    w.zkConnect = "localhost:8888";
+    w.zkConnect = super.zookeeperTestServer.getConnectString();
 
     //pass the cassandra information to the IronWorker
     w.properties.put("mocking.ks", "mockingbird");
@@ -76,15 +83,15 @@ public class MockingBirdIntegrationTest extends IronIntegrationTest {
     }
 
     Properties p = System.getProperties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
+    p.put(WorkloadManager.ZK_SERVER_LIST, super.zookeeperTestServer.getConnectString());
     WorkloadManager m = new WorkloadManager(p);
     m.init();
 
     m.applyWorkload(w);
     
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://www.ed.com/stuff"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://toys.ed.com/toys"));
-    producer.send(new KeyedMessage<Integer, String>(EVENTS, "http://www.ed.com/"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "http://www.ed.com/stuff"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "http://toys.ed.com/toys"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "http://www.ed.com/"));
 
     try {
       Thread.sleep(5000);

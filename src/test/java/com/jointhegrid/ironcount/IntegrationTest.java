@@ -26,8 +26,8 @@ import junit.framework.Assert;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
+import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
-import kafka.message.MessageAndMetadata;
 import kafka.producer.KeyedMessage;
 import kafka.serializer.StringDecoder;
 import kafka.utils.VerifiableProperties;
@@ -36,20 +36,20 @@ import org.junit.Test;
 
 public class IntegrationTest extends IronIntegrationTest {
 
+  public static final String EVENTS = "events";
   @Test
   public void hello() throws InterruptedException {
-    createTopic("events", 1, 1);
-    producer = new Producer<String, String>(super.createProducerConfig());
-    consumerConnector = Consumer.createJavaConsumerConnector(super.createConsumerConfig());
+   
+    createTopic(EVENTS, 1, 1);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
+    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(super.createConsumerConfig());
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 2000; i++) {
       producer.send(new KeyedMessage<String, String>(EVENTS, "1", i + ""));
     }
 
-    // producer.close();
-    Thread.sleep(2000);
     Map<String, Integer> consumers = new HashMap<String, Integer>();
-    consumers.put(this.EVENTS, 1);
+    consumers.put(EVENTS, 1);
     StringDecoder decoder = new StringDecoder(new VerifiableProperties());
     Map<String, List<KafkaStream<String, String>>> topicMessageStreams = consumerConnector
             .createMessageStreams(consumers, decoder, decoder);
@@ -61,7 +61,6 @@ public class IntegrationTest extends IronIntegrationTest {
     Thread t = new Thread() {
 
       public void run() {
-        System.out.println("starting thread");
         ConsumerIterator<String, String> it = stream.iterator();
         while (it.hasNext()){
           String msg = it.next().message();
@@ -77,7 +76,7 @@ public class IntegrationTest extends IronIntegrationTest {
     t.start();
     t.join();
 
-    Assert.assertEquals(10, in.get());
+    Assert.assertEquals(1999, in.get());
 
   }
 

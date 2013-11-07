@@ -39,12 +39,8 @@ import com.netflix.curator.test.TestingServer;
 
 public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
-  public static final String EVENTS = "events";
-  public static KafkaServer server;
-  public static ConsumerConnector consumerConnector;
-  public Producer producer;
+  public static KafkaServer server;  
   public static TestingServer zookeeperTestServer ;
-
 
   public static void createTopic(String name, int replica, int partitions ) {
     String[] arguments = new String[8];
@@ -80,7 +76,6 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
     brokerProps.put( "broker.id", "1");
     WorkerThread.putZkConnect(brokerProps, "localhost:"+zookeeperTestServer.getPort());
     brokerProps.put("port","9092");
-    brokerProps.setProperty("topic.partition.count.map", EVENTS+":1"+",map:2,reduce:2");
     brokerProps.setProperty("num.partitions", "10");
     brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
     KafkaConfig config= new KafkaConfig(brokerProps);
@@ -108,11 +103,6 @@ public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
     consumerProps.put("auto.offset.reset", "smallest");
     ConsumerConfig consumerConfig = new ConsumerConfig(consumerProps);
     return consumerConfig;
-  }
-  
-  @After
-  public void cleanup(){
-    
   }
 
 }

@@ -23,36 +23,40 @@ import org.apache.hadoop.fs.Path;
 public class CaligraphyMessageHandler implements MessageHandler {
 
   private Workload w;
+
   private WorkerThread wt;
-  private Map<String,Writer> outs;
+
+  private Map<String, Writer> outs;
+
   FileSystem fs;
 
-  public CaligraphyMessageHandler(){
-    outs=new HashMap<String,Writer>();
+  public CaligraphyMessageHandler() {
+    outs = new HashMap<String, Writer>();
   }
 
   @Override
   public void setWorkload(Workload w) {
-    this.w=w;
+    this.w = w;
   }
 
   @Override
   public void handleMessage(MessageAndMetadata m) {
     String s = m.message().toString();
-    String key = s.substring(0,s.indexOf("|"));
-    String rest = s.substring(s.indexOf("|")+1);
-    if ( this.outs.containsKey(key) ){
+    System.out.println(s);
+    String key = s.substring(0, s.indexOf("|"));
+    String rest = s.substring(s.indexOf("|") + 1);
+    if (this.outs.containsKey(key)) {
       try {
-        this.outs.get(key).write(rest+"\n");
+        this.outs.get(key).write(rest + "\n");
       } catch (IOException ex) {
         Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
     } else {
       try {
-        BufferedWriter bw = new BufferedWriter( new OutputStreamWriter
-                (fs.create(new Path("/tmp/events", key) )));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(
+                "/tmp/events", key))));
         this.outs.put(key, bw);
-        this.outs.get(key).write(rest+"\n");
+        this.outs.get(key).write(rest + "\n");
       } catch (IOException ex) {
         Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -60,15 +64,14 @@ public class CaligraphyMessageHandler implements MessageHandler {
 
   }
 
-  
   @Override
   public void setWorkerThread(WorkerThread wt) {
-    this.wt=wt;
-    
+    this.wt = wt;
+
     Configuration conf = new Configuration();
     try {
-      //in 'real' life you would do something like this
-      //conf.set("fs.default.name", w.properties.get("fs.default.name"));
+      // in 'real' life you would do something like this
+      // conf.set("fs.default.name", w.properties.get("fs.default.name"));
       fs = FileSystem.get(conf);
     } catch (IOException ex) {
       Logger.getLogger(CaligraphyMessageHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -76,25 +79,17 @@ public class CaligraphyMessageHandler implements MessageHandler {
 
   }
 
-  public static String getMessage(Message message) {
-    ByteBuffer buffer = message.payload();
-    byte[] bytes = new byte[buffer.remaining()];
-    buffer.get(bytes);
-    return new String(bytes);
-  }
-
   @Override
   public void stop() {
-    for (Map.Entry<String,Writer> entry:
-      this.outs.entrySet() ){
-      if (entry.getValue()!=null){
+    for (Map.Entry<String, Writer> entry : this.outs.entrySet()) {
+      if (entry.getValue() != null) {
         try {
           entry.getValue().flush();
           entry.getValue().close();
-        } catch (IOException ex) { }
+        } catch (IOException ex) {
+        }
       }
     }
   }
-  
-}
 
+}

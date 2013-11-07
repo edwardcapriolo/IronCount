@@ -16,6 +16,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import kafka.javaapi.producer.Producer;
+import kafka.producer.KeyedMessage;
+
 import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.query.CounterQuery;
@@ -24,15 +27,19 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
+ * 
  * @author edward
  */
-/*
+
 public class CaligraphyIntegrationTest extends IronIntegrationTest {
 
-   @Test
+  private static final String EVENTS = "events";
+
+  @Test
   public void mockingBirdDemo() throws FileNotFoundException, IOException {
 
+    createTopic(EVENTS, 1, 1);
+    Producer<String, String> producer = new Producer<String, String>(super.createProducerConfig());
 
     Workload w = new Workload();
     w.active = true;
@@ -41,25 +48,27 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
     w.messageHandlerName = "com.jointhegrid.ironcount.caligraphy.CaligraphyMessageHandler";
     w.name = "cworkload";
     w.properties = new HashMap<String, String>();
-    w.topic = topic;
-    w.zkConnect = "localhost:8888";
+    w.topic = EVENTS;
+    w.zkConnect = this.zookeeperTestServer.getConnectString();
+
+   
+    Properties p = System.getProperties();
+    p.put(WorkloadManager.ZK_SERVER_LIST, this.zookeeperTestServer.getConnectString());
+    WorkloadManager m = new WorkloadManager(p);
+    m.init();
+
+    m.applyWorkload(w);
 
     try {
       Thread.sleep(1000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
-
-    Properties p = System.getProperties();
-    p.put(WorkloadManager.ZK_SERVER_LIST, "localhost:8888");
-    WorkloadManager m = new WorkloadManager(p);
-    m.init();
-
-    m.applyWorkload(w);
-
-    producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.34"));
-    producer.send(new ProducerData<Integer, String>(topic, "2012-01-01|/index.htm|34.34.34.35"));
-    producer.send(new ProducerData<Integer, String>(topic, "2012-01-02|/index.htm|34.34.34.36"));
+    
+    
+    producer.send(new KeyedMessage<String, String>(EVENTS, "2012-01-01|/index.htm|34.34.34.34"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "2012-01-01|/index.htm|34.34.34.35"));
+    producer.send(new KeyedMessage<String, String>(EVENTS, "2012-01-02|/index.htm|34.34.34.36"));
 
     try {
       Thread.sleep(10000);
@@ -67,17 +76,22 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    w.active=false;
+    w.active = false;
     m.applyWorkload(w);
-     try {
+    try {
       Thread.sleep(2000);
     } catch (InterruptedException ex) {
       Logger.getLogger(IronIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    //m.deleteWorkload(w);
     m.shutdown();
-
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
     FileReader fr = new FileReader("/tmp/events/2012-01-01");
     BufferedReader br = new BufferedReader(fr);
     String line1 = br.readLine();
@@ -88,4 +102,3 @@ public class CaligraphyIntegrationTest extends IronIntegrationTest {
   }
 
 }
-*/

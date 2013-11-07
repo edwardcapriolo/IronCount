@@ -30,157 +30,113 @@ import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.utils.Time;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import com.jointhegrid.ironcount.manager.WorkerThread;
+import com.netflix.curator.test.TestingServer;
 
 public abstract class IronIntegrationTest extends BaseEmbededServerSetupTest {
 
+  public static final String EVENTS = "events";
   public static KafkaServer server;
-  public Properties consumerProps;
-  public Properties producerProps;
-  public Properties brokerProps;
-
-  public  KafkaConfig config;
-
   public static ConsumerConnector consumerConnector;
   public Producer producer;
-  public ProducerConfig producerConfig;
-  public ConsumerConfig consumerConfig;
+  public static TestingServer zookeeperTestServer ;
 
-  public static final String EVENTS = "events";
 
-  public static EmbeddedZookeeper zk;
-
-  public static final String LOCAL_ZK_ADDRESS = "localhost:8888";
-  
-  public static void createEventsTopic() {
+  public static void createTopic(String name, int replica, int partitions ) {
     String[] arguments = new String[8];
     arguments[0] = "--zookeeper";
-    arguments[1] = LOCAL_ZK_ADDRESS;
+    arguments[1] = "localhost:"+zookeeperTestServer.getPort();
     arguments[2] = "--replica";
-    arguments[3] = "1";
+    arguments[3] = replica+"";
     arguments[4] = "--partition";
-    arguments[5] = "1";
+    arguments[5] = partitions+"";
     arguments[6] = "--topic";
-    arguments[7] = EVENTS;
+    arguments[7] = name;
 
     CreateTopicCommand.main(arguments);
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-
-  public static void createMapTopic() {
-    String[] arguments = new String[8];
-    arguments[0] = "--zookeeper";
-    arguments[1] = LOCAL_ZK_ADDRESS;
-    arguments[2] = "--replica";
-    arguments[3] = "1";
-    arguments[4] = "--partition";
-    arguments[5] = "2";
-    arguments[6] = "--topic";
-    arguments[7] = "map";
-
-    CreateTopicCommand.main(arguments);
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-
-  public static void createReduceTopic() {
-    String[] arguments = new String[8];
-    arguments[0] = "--zookeeper";
-    arguments[1] = LOCAL_ZK_ADDRESS;
-    arguments[2] = "--replica";
-    arguments[3] = "1";
-    arguments[4] = "--partition";
-    arguments[5] = "2";
-    arguments[6] = "--topic";
-    arguments[7] = "reduce";
-
-    CreateTopicCommand.main(arguments);
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
   
-  
-  
-  @Before
-  public void setupLocal() throws Exception{
-    System.out.println("setup local");
-    if ( zk == null ) {
-
-      zk = new EmbeddedZookeeper(8888);
-      zk.prepair();
-      zk.start();
+  @BeforeClass
+  public static void beforeClass() throws Exception{
+    String kdir = "/tmp/ks1logdir";
+    zookeeperTestServer = new TestingServer();
+    
+    File ks1logdir = new File(kdir);
+    if (ks1logdir.exists()){
+      EmbeddedZookeeper.delete(ks1logdir);
     }
-
-    File ks1logdir = new File("/tmp/ks1logdir");
     ks1logdir.mkdir();
-
-    brokerProps = new Properties();
+    Properties brokerProps= new Properties();
     brokerProps.put("enable.zookeeper","true");
-    brokerProps.put( "broker.id", "777");
-    WorkerThread.putZkConnect(brokerProps, "localhost:8888");
-    /*
-    brokerProps.put("zk.connect", "localhost:8888");*/
+    brokerProps.put( "broker.id", "1");
+    WorkerThread.putZkConnect(brokerProps, "localhost:"+zookeeperTestServer.getPort());
     brokerProps.put("port","9092");
-
-    consumerProps = new Properties();
-    WorkerThread.putZkConnect(consumerProps, "localhost:8888");
-
-    producerProps = new Properties();
-    producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
-    WorkerThread.putZkConnect(producerProps, "localhost:8888");
-    producerProps.setProperty("batch.size", "1");
-    producerProps.setProperty("queue.time", "100");
-    producerProps.setProperty("queue.size", "1");
-    producerProps.setProperty("batch.num.messages", "1");
-    producerProps.setProperty("producer.type", "async");
-    
-    producerProps.put("metadata.broker.list", "localhost:9092");
-    WorkerThread.putGroupId(consumerProps, "group1");
-    
-    consumerConfig = new ConsumerConfig(consumerProps);
-    producerConfig = new ProducerConfig(producerProps);
-
-    brokerProps.setProperty("topic.partition.count.map", EVENTS+":2"+",map:2,reduce:2");
+    brokerProps.setProperty("topic.partition.count.map", EVENTS+":1"+",map:2,reduce:2");
     brokerProps.setProperty("num.partitions", "10");
     brokerProps.setProperty("log.dir", "/tmp/ks1logdir");
-
-    File f = new File ("/tmp/ks1logdir");
-    EmbeddedZookeeper.delete(f);
-
-    config = new KafkaConfig(brokerProps);
-
-    producer = new Producer<String,String>(producerConfig);
-
-    
+    KafkaConfig config= new KafkaConfig(brokerProps);
     if (server == null) {
-      server = new kafka.server.KafkaServer(config, new kafka.utils.MockTime());
+      server = new kafka.server.KafkaServer(config, new Realtime());
       server.startup();
-      consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
     }
-    createEventsTopic();
-    createMapTopic();
-    createReduceTopic();
+    
+  }
+  
+  protected static ProducerConfig createProducerConfig(){
+    Properties producerProps = new Properties();
+    producerProps.put("serializer.class", "kafka.serializer.StringEncoder");
+    WorkerThread.putZkConnect(producerProps, "localhost:"+zookeeperTestServer.getPort());
+    producerProps.setProperty("batch.size", "10");
+    producerProps.setProperty("producer.type", "async");
+    producerProps.put("metadata.broker.list", "localhost:9092");
+    return new ProducerConfig(producerProps); 
   }
 
-  public static String getMessage(Message message) {
-    ByteBuffer buffer = message.payload();
-    byte[] bytes = new byte[buffer.remaining()];
-    buffer.get(bytes);
-    return new String(bytes);
+  protected ConsumerConfig createConsumerConfig(){
+    Properties consumerProps = new Properties();
+    WorkerThread.putZkConnect(consumerProps, "localhost:"+zookeeperTestServer.getPort());
+    WorkerThread.putGroupId(consumerProps, "group1");
+    consumerProps.put("auto.offset.reset", "smallest");
+    ConsumerConfig consumerConfig = new ConsumerConfig(consumerProps);
+    return consumerConfig;
   }
+  
+  @After
+  public void cleanup(){
+    
+  }
+
 }
+class Realtime implements Time { 
+
+  public Realtime(){
+    
+  }
+
+  @Override
+  public long milliseconds() {
+    return System.currentTimeMillis();
+  }
+
+  @Override
+  public long nanoseconds() {
+    return System.nanoTime();
+  }
+
+  @Override
+  public void sleep(long arg0) {
+    try {
+    Thread.sleep(arg0);
+    } catch (Exception ex){}
+  }
+  
+};

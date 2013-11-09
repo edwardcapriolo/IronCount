@@ -20,7 +20,6 @@ public class Driver implements Runnable {
    * Begin processing the feed in a thread
    */
   public void run(){
-    System.out.println("here");
     Tuple t = new Tuple();
     while (fp.next(t)){
       System.out.println(t);

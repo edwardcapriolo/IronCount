@@ -22,4 +22,9 @@ public class Collector extends ICollector{
   public Pair<Tuple,Tuple> take() throws InterruptedException{
     return collected.take();
   }
+  
+  public Pair<Tuple,Tuple> peek() throws InterruptedException{
+    return collected.peek();
+  }
+  
 }

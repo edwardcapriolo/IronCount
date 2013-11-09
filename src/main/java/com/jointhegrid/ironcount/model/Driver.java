@@ -1,7 +1,7 @@
 package com.jointhegrid.ironcount.model;
 
 
-
+/** driver consumes data from a feed partition and inserts it into operators */
 public class Driver implements Runnable {
   private FeedPartition fp;
   private DriverNode driverNode;
@@ -22,7 +22,6 @@ public class Driver implements Runnable {
   public void run(){
     Tuple t = new Tuple();
     while (fp.next(t)){
-      System.out.println(t);
       driverNode.getOperator().handleTuple(t);
       t = new Tuple();
     }

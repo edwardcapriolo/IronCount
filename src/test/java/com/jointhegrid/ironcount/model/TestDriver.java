@@ -35,9 +35,9 @@ public class TestDriver {
     t.join();
 
     List<Tuple> expected = new ArrayList<Tuple>();
-    for (int i =0;i<9;i++){
+    for (int i = 0; i < 9; i++) {
       Tuple tup = new Tuple();
-      tup.setField("x", (i-1)*2);
+      tup.setField("x", (i - 1) * 2);
       expected.add(tup);
     }
     assertExpectedPairs(child, expected);

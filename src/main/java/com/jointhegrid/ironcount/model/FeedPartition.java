@@ -10,7 +10,6 @@ public abstract class FeedPartition {
     
   }
   
-  //MAybe return iterator here
   public abstract boolean next(Tuple t);
   
   public void close(){

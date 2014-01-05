@@ -1,3 +1,8 @@
+Project EOL
+=============
+IronCount is EOL. Efforts have moved onto teknek. https://github.com/edwardcapriolo/teknek
+
+
 IronCount
 =============
 

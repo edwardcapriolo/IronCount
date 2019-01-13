@@ -144,7 +144,7 @@ them and then send them to the `reduce` topic.
 
 Kafka has the notion of partitioners and the join key is used internally to route 
 messages for the same user_id to the same partition of a topic.  The ReduceHandler writes
-partial aggreggations as Cassandra counters made possible by Kafka's underlying partitioning. 
+partial aggregations as Cassandra counters made possible by Kafka's underlying partitioning. 
 
 In this example the map Workload creates data for the reduce Workload. You can imagine this
 as a pipe or a feedback loop.
